@@ -2,6 +2,9 @@
 name = "engram"
 version = "0.1.0"
 edition = "2024"
+description = "Persistent structured memory for AI agents"
+homepage = "https://github.com/cleverlook/engram"
+repository = "https://github.com/cleverlook/engram"
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
@@ -17,3 +20,8 @@ console = "0.15"
 
 [dev-dependencies]
 tempfile = "3"
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
