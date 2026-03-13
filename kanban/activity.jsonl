@@ -46,3 +46,6 @@
 {"timestamp":"2026-03-14T00:23:11.115667+01:00","action":"move","task_id":15,"detail":"in-progress -\u003e done"}
 {"timestamp":"2026-03-14T00:23:46.508976+01:00","action":"move","task_id":16,"detail":"backlog -\u003e in-progress"}
 {"timestamp":"2026-03-14T00:28:38.736005+01:00","action":"move","task_id":16,"detail":"in-progress -\u003e done"}
+{"timestamp":"2026-03-14T00:28:58.699616+01:00","action":"move","task_id":17,"detail":"backlog -\u003e in-progress"}
+{"timestamp":"2026-03-14T00:30:29.464262+01:00","action":"create","task_id":20,"detail":"Switch timestamps from NaiveDate to UTC DateTime (chrono::Utc)"}
+{"timestamp":"2026-03-14T00:30:29.479098+01:00","action":"move","task_id":17,"detail":"in-progress -\u003e done"}

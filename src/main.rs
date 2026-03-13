@@ -8,7 +8,7 @@ mod storage;
 
 use clap::{CommandFactory, Parser};
 use clap_complete::generate;
-use cli::{Cli, Command, NodeAction};
+use cli::{Cli, Command, LakeAction, NodeAction};
 use std::env;
 
 fn main() -> anyhow::Result<()> {
@@ -55,6 +55,11 @@ fn main() -> anyhow::Result<()> {
         Command::Status => commands::status::run(&cwd),
         Command::Check => commands::check::run(&cwd),
         Command::RebuildIndex => commands::rebuild_index::run(&cwd),
+        Command::Lake { action } => match action {
+            LakeAction::Add { file, link } => commands::lake::add(&cwd, &file, link.as_deref()),
+            LakeAction::List => commands::lake::list(&cwd),
+            LakeAction::Remove { file } => commands::lake::remove(&cwd, &file),
+        },
         Command::Completion { shell } => {
             generate(shell, &mut Cli::command(), "engram", &mut std::io::stdout());
             Ok(())

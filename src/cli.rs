@@ -57,6 +57,12 @@ pub enum Command {
     /// Rebuild _index.yaml, _backlinks.yaml, and SQLite
     RebuildIndex,
 
+    /// Manage data lake artifacts
+    Lake {
+        #[command(subcommand)]
+        action: LakeAction,
+    },
+
     /// Generate shell completions
     Completion {
         /// Shell to generate completions for
@@ -122,5 +128,25 @@ pub enum NodeAction {
     Deprecate {
         /// Node id
         id: String,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum LakeAction {
+    /// Add a file to the data lake
+    Add {
+        /// File path to copy into data lake
+        file: String,
+
+        /// Link to this node (optional)
+        #[arg(short, long)]
+        link: Option<String>,
+    },
+    /// List all files in the data lake
+    List,
+    /// Remove a file from the data lake
+    Remove {
+        /// Filename in data lake
+        file: String,
     },
 }

@@ -1,6 +1,7 @@
 pub mod backlinks;
 pub mod check;
 pub mod init;
+pub mod lake;
 pub mod node;
 pub mod rebuild_index;
 pub mod search;
