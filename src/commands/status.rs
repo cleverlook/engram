@@ -1,7 +1,7 @@
-use std::fs;
-use std::path::Path;
 use anyhow::Result;
 use chrono::Local;
+use std::fs;
+use std::path::Path;
 
 use crate::models::node::NodeStatus;
 use crate::storage;
@@ -19,19 +19,17 @@ pub fn run(path: &Path) -> Result<()> {
         let mut changed = false;
 
         // Dirty detection: check source_hash against current files
-        if !node.source_files.is_empty() {
-            if let Some(ref stored_hash) = node.source_hash {
+        if !node.source_files.is_empty()
+            && let Some(ref stored_hash) = node.source_hash {
                 let current_hash = compute_source_hash(path, &node.source_files);
-                if let Some(ref hash) = current_hash {
-                    if hash != stored_hash && node.status == NodeStatus::Active {
+                if let Some(ref hash) = current_hash
+                    && hash != stored_hash && node.status == NodeStatus::Active {
                         node.status = NodeStatus::Dirty;
                         changed = true;
                         dirty_count += 1;
                         println!("  dirty: {} (source files changed)", node.id);
                     }
-                }
             }
-        }
 
         // Stale detection
         let days_untouched = (today - node.touched).num_days();
@@ -63,7 +61,10 @@ pub fn run(path: &Path) -> Result<()> {
     }
 
     println!();
-    println!("Status: {} dirty, {} stale, {} decayed", dirty_count, stale_count, decayed_count);
+    println!(
+        "Status: {} dirty, {} stale, {} decayed",
+        dirty_count, stale_count, decayed_count
+    );
     Ok(())
 }
 

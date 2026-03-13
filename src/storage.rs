@@ -1,6 +1,6 @@
+use anyhow::{Context, Result, bail};
 use std::fs;
 use std::path::{Path, PathBuf};
-use anyhow::{bail, Context, Result};
 
 use crate::models::node::Node;
 
@@ -37,8 +37,8 @@ pub fn load_node(engram_dir: &Path, id: &str) -> Result<Node> {
     let path = node_path(engram_dir, id);
     let content = fs::read_to_string(&path)
         .with_context(|| format!("Node '{}' not found at {}", id, path.display()))?;
-    let node: Node = serde_yaml::from_str(&content)
-        .with_context(|| format!("Failed to parse node '{}'", id))?;
+    let node: Node =
+        serde_yaml::from_str(&content).with_context(|| format!("Failed to parse node '{}'", id))?;
     Ok(node)
 }
 

@@ -1,7 +1,7 @@
+use anyhow::{Result, bail};
+use chrono::Local;
 use std::io::{self, Read};
 use std::path::Path;
-use anyhow::{bail, Result};
-use chrono::Local;
 
 use crate::db;
 use crate::indexing;
@@ -76,8 +76,8 @@ pub fn deprecate(path: &Path, id: &str) -> Result<()> {
     node.touched = Local::now().date_naive();
 
     storage::save_node(&engram_dir, &node)?;
-    indexing::update_index_for_node(&engram_dir, &node)?;
-    db::upsert_node(&engram_dir, &node)?;
+    indexing::remove_from_index(&engram_dir, id)?;
+    db::delete_node(&engram_dir, id)?;
     println!("Deprecated node '{}'", node.id);
     Ok(())
 }

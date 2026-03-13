@@ -17,35 +17,63 @@ cargo clippy             # Lint
 cargo fmt                # Format code
 ```
 
-## Current State
-
-The project is in early development — only a stub `main.rs` exists. Implementation should follow `ENGRAM_SPEC.md` as the source of truth.
-
 ## Tech Stack
 
 - **Rust** (edition 2024)
-- **clap** — CLI argument parsing
-- **serde_yaml** — YAML serialization/deserialization
-- **rusqlite** — SQLite for FTS5 full-text search (optional cache, never source of truth)
+- **clap** (derive) — CLI argument parsing
+- **serde + serde_yaml** — YAML serialization/deserialization
+- **rusqlite** (bundled, vtab) — SQLite for FTS5 full-text search
 - **md5** — Source file hash for dirty detection
+- **chrono** — Date handling
+- **anyhow** — Error handling
 
 ## Architecture
 
-The codebase implements a CLI (`clap`) around a node-graph memory system:
+### Module Structure
 
-- **Nodes**: Self-contained knowledge stored as YAML files, organized in hierarchical namespaces (`:` separator maps to filesystem directories, e.g., `auth:oauth:google` → `nodes/auth/oauth/google.yaml`)
-- **Graph**: Directed weighted edges stored inside source nodes (outgoing). Backlinks (`_backlinks.yaml`) are derived and stored per namespace.
-- **Indexes**: `_index.yaml` at each namespace level summarizes contained nodes. Rebuilt via `engram rebuild-index`.
-- **SQLite**: Derived cache for FTS5 search only. YAML files are always the source of truth. Database lives at `.engram/engram.db` and is gitignored.
-- **Data Lake**: `.engram/data_lake/` stores artifacts (images, PDFs, notes) referenced by nodes.
+```
+src/
+├── main.rs           — Entry point, routes CLI commands
+├── cli.rs            — clap Parser/Subcommand definitions
+├── storage.rs        — Node id ↔ filesystem path mapping, load/save, find .engram/
+├── db.rs             — SQLite: open, create tables, upsert/delete/search/rebuild
+├── indexing.rs       — _index.yaml and _backlinks.yaml management
+├── models/
+│   ├── node.rs       — Node, Edge, NodeStatus, EdgeType
+│   ├── index.rs      — NamespaceIndex, IndexEntry, NamespaceSummary
+│   └── backlinks.rs  — NamespaceBacklinks, NodeBacklinks, IncomingEdge
+└── commands/
+    ├── init.rs       — Create .engram/ structure, SQLite, SKILL.md
+    ├── node.rs       — CRUD: get, create, update, deprecate
+    ├── search.rs     — FTS5 full-text search
+    ├── traverse.rs   — Weighted BFS graph traversal
+    ├── backlinks.rs  — Display incoming edges
+    ├── status.rs     — Dirty detection, stale reporting, weight decay
+    ├── check.rs      — Graph integrity validation
+    └── rebuild_index.rs — Full rebuild of indexes, backlinks, SQLite
+```
 
-### Key CLI Commands
+### Data Flow
+
+Every node mutation (create/update/deprecate) triggers three side effects in order:
+1. **YAML write** (`storage::save_node`) — source of truth
+2. **Index update** (`indexing::update_index_for_node` + `update_backlinks_for_node`) — `_index.yaml` and `_backlinks.yaml`
+3. **SQLite sync** (`db::upsert_node`) — derived FTS5 cache
+
+### Key Design Decisions
+
+- **YAML is always source of truth.** SQLite is a derived cache, rebuilt from YAML via `rebuild-index`.
+- **Namespace hierarchy maps to filesystem.** Node id `auth:oauth:google` → `nodes/auth/oauth/google.yaml`. The `storage::node_path()` function handles this mapping.
+- **`.engram/` is discovered by walking upward** from cwd, similar to how git finds `.git/`. See `storage::find_engram_dir()`.
+- **Templates live in `templates/`** and are embedded via `include_str!()` at compile time.
+
+### CLI Commands
 
 `init` | `node get/create/update/deprecate` | `search` | `traverse` | `backlinks` | `status` | `check` | `rebuild-index`
 
 ### Core Algorithm
 
-Graph traversal uses weighted BFS with a token budget (default 4000), max depth (default 5), and min-weight filter. Visited nodes get their `touched` date updated and weight incremented by 1. See `ENGRAM_SPEC.md` § Traversal Algorithm for pseudocode.
+Graph traversal uses weighted BFS (`BinaryHeap`) with a token budget (default 4000), max depth (default 5), and min-weight filter. Visited nodes get their `touched` date updated and weight incremented by 1. See `ENGRAM_SPEC.md` § Traversal Algorithm for pseudocode.
 
 ### Node Lifecycle
 

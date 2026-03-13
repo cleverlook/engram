@@ -1,6 +1,6 @@
+use anyhow::{Result, bail};
 use std::fs;
 use std::path::Path;
-use anyhow::{bail, Result};
 
 use crate::db;
 

@@ -1,3 +1,3 @@
-pub mod node;
-pub mod index;
 pub mod backlinks;
+pub mod index;
+pub mod node;

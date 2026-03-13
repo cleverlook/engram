@@ -1,8 +1,8 @@
-use std::collections::{BinaryHeap, HashSet};
-use std::cmp::Ordering;
-use std::path::Path;
 use anyhow::Result;
 use chrono::Local;
+use std::cmp::Ordering;
+use std::collections::{BinaryHeap, HashSet};
+use std::path::Path;
 
 use crate::db;
 use crate::models::node::NodeStatus;
@@ -74,7 +74,10 @@ pub fn run(path: &Path, id: &str, max_depth: u32, min_weight: u8, budget: usize)
         } else {
             ""
         };
-        println!("--- {} (weight: {}, depth: {}){} ---", node.id, node.weight, entry.depth, stale_marker);
+        println!(
+            "--- {} (weight: {}, depth: {}){} ---",
+            node.id, node.weight, entry.depth, stale_marker
+        );
         println!("{}", node.content.trim());
         println!();
 

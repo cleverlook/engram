@@ -1,6 +1,6 @@
+use anyhow::Result;
 use std::fs;
 use std::path::Path;
-use anyhow::Result;
 
 use crate::models::backlinks::NamespaceBacklinks;
 use crate::storage;
@@ -24,7 +24,10 @@ pub fn run(path: &Path, id: &str) -> Result<()> {
         Some(entry) => {
             println!("Backlinks for '{}':", id);
             for incoming in &entry.incoming {
-                println!("  <- {} ({}, weight: {})", incoming.from, incoming.edge_type, incoming.weight);
+                println!(
+                    "  <- {} ({}, weight: {})",
+                    incoming.from, incoming.edge_type, incoming.weight
+                );
             }
         }
         None => {

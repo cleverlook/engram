@@ -1,5 +1,5 @@
-use std::path::Path;
 use anyhow::Result;
+use std::path::Path;
 
 use crate::db;
 use crate::storage;
@@ -15,7 +15,10 @@ pub fn run(path: &Path, query: &str) -> Result<()> {
 
     for id in &ids {
         let node = storage::load_node(&engram_dir, id)?;
-        println!("--- {} (weight: {}, status: {:?}) ---", node.id, node.weight, node.status);
+        println!(
+            "--- {} (weight: {}, status: {:?}) ---",
+            node.id, node.weight, node.status
+        );
         println!("{}", node.content.trim());
         println!();
     }

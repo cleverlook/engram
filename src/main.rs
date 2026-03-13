@@ -5,9 +5,9 @@ mod indexing;
 mod models;
 mod storage;
 
-use std::env;
 use clap::Parser;
 use cli::{Cli, Command, NodeAction};
+use std::env;
 
 fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
@@ -22,9 +22,12 @@ fn main() -> anyhow::Result<()> {
             NodeAction::Deprecate { id } => commands::node::deprecate(&cwd, &id),
         },
         Command::Search { query } => commands::search::run(&cwd, &query),
-        Command::Traverse { id, depth, min_weight, budget } => {
-            commands::traverse::run(&cwd, &id, depth, min_weight, budget)
-        }
+        Command::Traverse {
+            id,
+            depth,
+            min_weight,
+            budget,
+        } => commands::traverse::run(&cwd, &id, depth, min_weight, budget),
         Command::Backlinks { id } => commands::backlinks::run(&cwd, &id),
         Command::Status => commands::status::run(&cwd),
         Command::Check => commands::check::run(&cwd),

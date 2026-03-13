@@ -1,7 +1,7 @@
-use std::collections::{HashMap, HashSet};
-use std::path::Path;
 use anyhow::Result;
 use chrono::Local;
+use std::collections::HashSet;
+use std::path::Path;
 
 use crate::storage;
 
@@ -35,7 +35,10 @@ pub fn run(path: &Path) -> Result<()> {
         for dl_ref in &node.data_lake {
             let dl_path = engram_dir.join("data_lake").join(dl_ref);
             if !dl_path.exists() {
-                println!("  broken data_lake ref: {} -> {} (file not found)", node.id, dl_ref);
+                println!(
+                    "  broken data_lake ref: {} -> {} (file not found)",
+                    node.id, dl_ref
+                );
                 issues += 1;
             }
         }
@@ -46,7 +49,10 @@ pub fn run(path: &Path) -> Result<()> {
         let days_untouched = (today - node.touched).num_days();
 
         if !has_outgoing && !has_inc && node.weight < 10 && days_untouched > 180 {
-            println!("  orphan: {} (no edges, weight {}, {} days untouched)", node.id, node.weight, days_untouched);
+            println!(
+                "  orphan: {} (no edges, weight {}, {} days untouched)",
+                node.id, node.weight, days_untouched
+            );
             issues += 1;
         }
     }

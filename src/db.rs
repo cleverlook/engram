@@ -1,9 +1,8 @@
-use std::path::Path;
-use rusqlite::Connection;
 use anyhow::Result;
+use rusqlite::Connection;
+use std::path::Path;
 
 use crate::models::node::Node;
-use crate::storage;
 
 pub fn open(engram_dir: &Path) -> Result<Connection> {
     let db_path = engram_dir.join("engram.db");
@@ -22,7 +21,7 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
             touched TEXT
         );
 
-        CREATE VIRTUAL TABLE IF NOT EXISTS nodes_fts USING fts5(id, content, tags);"
+        CREATE VIRTUAL TABLE IF NOT EXISTS nodes_fts USING fts5(id, content, tags);",
     )?;
     Ok(())
 }
@@ -76,9 +75,8 @@ pub fn delete_node(engram_dir: &Path, id: &str) -> Result<()> {
 
 pub fn search(engram_dir: &Path, query: &str) -> Result<Vec<String>> {
     let conn = open(engram_dir)?;
-    let mut stmt = conn.prepare(
-        "SELECT id FROM nodes_fts WHERE nodes_fts MATCH ?1 ORDER BY rank"
-    )?;
+    let mut stmt =
+        conn.prepare("SELECT id FROM nodes_fts WHERE nodes_fts MATCH ?1 ORDER BY rank")?;
     let ids: Vec<String> = stmt
         .query_map([query], |row| row.get(0))?
         .filter_map(|r| r.ok())
@@ -93,12 +91,12 @@ pub fn rebuild(engram_dir: &Path) -> Result<()> {
     conn.execute("DELETE FROM nodes_fts", [])?;
 
     let nodes_dir = engram_dir.join("nodes");
-    rebuild_from_dir(&conn, engram_dir, &nodes_dir)?;
+    rebuild_from_dir(&conn, &nodes_dir)?;
 
     Ok(())
 }
 
-fn rebuild_from_dir(conn: &Connection, engram_dir: &Path, dir: &Path) -> Result<()> {
+fn rebuild_from_dir(conn: &Connection, dir: &Path) -> Result<()> {
     if !dir.is_dir() {
         return Ok(());
     }
@@ -108,14 +106,14 @@ fn rebuild_from_dir(conn: &Connection, engram_dir: &Path, dir: &Path) -> Result<
         let path = entry.path();
 
         if path.is_dir() {
-            rebuild_from_dir(conn, engram_dir, &path)?;
+            rebuild_from_dir(conn, &path)?;
         } else if path.extension().is_some_and(|e| e == "yaml") {
             let filename = path.file_name().unwrap().to_string_lossy();
             if filename.starts_with('_') {
                 continue; // skip _index.yaml, _backlinks.yaml
             }
-            if let Ok(content) = std::fs::read_to_string(&path) {
-                if let Ok(node) = serde_yaml::from_str::<Node>(&content) {
+            if let Ok(content) = std::fs::read_to_string(&path)
+                && let Ok(node) = serde_yaml::from_str::<Node>(&content) {
                     let status_str = serde_yaml::to_string(&node.status)?;
                     let namespace = namespace_of(&node.id);
 
@@ -136,7 +134,6 @@ fn rebuild_from_dir(conn: &Connection, engram_dir: &Path, dir: &Path) -> Result<
                         rusqlite::params![node.id, node.content, ""],
                     )?;
                 }
-            }
         }
     }
 

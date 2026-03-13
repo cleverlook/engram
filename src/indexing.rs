@@ -1,6 +1,6 @@
+use anyhow::{Context, Result};
 use std::fs;
 use std::path::Path;
-use anyhow::{Context, Result};
 
 use crate::models::backlinks::{IncomingEdge, NamespaceBacklinks, NodeBacklinks};
 use crate::models::index::{IndexEntry, NamespaceIndex, NamespaceSummary};
@@ -137,9 +137,7 @@ pub fn update_backlinks_for_node(engram_dir: &Path, node: &Node) -> Result<()> {
         fs::create_dir_all(&target_ns_dir)?;
         let bl_path = target_ns_dir.join("_backlinks.yaml");
 
-        let target_ns = parent_namespace(&edge.to)
-            .unwrap_or("")
-            .to_string();
+        let target_ns = parent_namespace(&edge.to).unwrap_or("").to_string();
 
         let mut bl = load_backlinks(&bl_path)?;
         bl.namespace = target_ns;
