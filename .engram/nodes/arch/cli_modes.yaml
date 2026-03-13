@@ -12,8 +12,8 @@ status: active
 source_files:
 - src/commands/node.rs
 - src/cli.rs
-created: 2026-03-14
-touched: 2026-03-14
+created: 2026-03-14T00:20:43Z
+touched: 2026-03-14T00:20:43Z
 edges:
 - to: arch:data_flow
   type: related

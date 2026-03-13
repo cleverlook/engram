@@ -6,8 +6,8 @@ const NODE_ROOT: &str = r#"id: auth:oauth:google
 content: Google OAuth uses PKCE.
 weight: 65
 status: active
-created: 2024-03-10
-touched: 2024-03-10
+created: 2024-03-10T00:00:00Z
+touched: 2024-03-10T00:00:00Z
 edges:
   - to: redis:session_store
     type: uses
@@ -21,8 +21,8 @@ const NODE_REDIS: &str = r#"id: redis:session_store
 content: Redis stores session tokens.
 weight: 50
 status: active
-created: 2024-03-10
-touched: 2024-03-10
+created: 2024-03-10T00:00:00Z
+touched: 2024-03-10T00:00:00Z
 edges: []
 "#;
 
@@ -30,8 +30,8 @@ const NODE_FLOW: &str = r#"id: auth:oauth:flow
 content: Standard OAuth2 flow.
 weight: 80
 status: active
-created: 2024-03-10
-touched: 2024-03-10
+created: 2024-03-10T00:00:00Z
+touched: 2024-03-10T00:00:00Z
 edges: []
 "#;
 
@@ -39,8 +39,8 @@ const NODE_DEPRECATED: &str = r#"id: old:deprecated_thing
 content: This is deprecated.
 weight: 10
 status: deprecated
-created: 2024-01-01
-touched: 2024-01-01
+created: 2024-01-01T00:00:00Z
+touched: 2024-01-01T00:00:00Z
 edges: []
 "#;
 
@@ -89,8 +89,8 @@ fn test_traverse_skips_deprecated() {
 content: Root node.
 weight: 50
 status: active
-created: 2024-03-10
-touched: 2024-03-10
+created: 2024-03-10T00:00:00Z
+touched: 2024-03-10T00:00:00Z
 edges:
   - to: old:deprecated_thing
     type: related

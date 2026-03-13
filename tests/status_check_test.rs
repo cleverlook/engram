@@ -11,8 +11,8 @@ fn test_status_reports_stale_nodes() {
 content: Very old node.
 weight: 50
 status: active
-created: 2023-01-01
-touched: 2023-01-01
+created: 2023-01-01T00:00:00Z
+touched: 2023-01-01T00:00:00Z
 edges: []
 "#;
     helpers::create_node(dir.path(), old_node);
@@ -33,8 +33,8 @@ fn test_status_applies_weight_decay() {
 content: Node for decay test.
 weight: 50
 status: active
-created: 2023-01-01
-touched: 2023-01-01
+created: 2023-01-01T00:00:00Z
+touched: 2023-01-01T00:00:00Z
 edges: []
 "#;
     helpers::create_node(dir.path(), old_node);
@@ -59,8 +59,8 @@ fn test_check_finds_broken_edges() {
 content: Node with broken edge.
 weight: 50
 status: active
-created: 2024-03-10
-touched: 2024-03-10
+created: 2024-03-10T00:00:00Z
+touched: 2024-03-10T00:00:00Z
 edges:
   - to: does:not:exist
     type: uses
@@ -84,8 +84,8 @@ fn test_check_finds_broken_data_lake_refs() {
 content: Node with broken data lake ref.
 weight: 50
 status: active
-created: 2024-03-10
-touched: 2024-03-10
+created: 2024-03-10T00:00:00Z
+touched: 2024-03-10T00:00:00Z
 data_lake:
   - nonexistent.png
 edges: []
@@ -107,8 +107,8 @@ fn test_check_passes_clean_graph() {
 content: A clean node.
 weight: 50
 status: active
-created: 2026-03-10
-touched: 2026-03-10
+created: 2026-03-10T00:00:00Z
+touched: 2026-03-10T00:00:00Z
 edges: []
 "#;
     helpers::create_node(dir.path(), clean);

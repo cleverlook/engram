@@ -1,5 +1,5 @@
 use anyhow::Result;
-use chrono::Local;
+use chrono::Utc;
 use console::style;
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashSet};
@@ -31,7 +31,7 @@ impl PartialOrd for QueueEntry {
 
 pub fn run(path: &Path, id: &str, max_depth: u32, min_weight: u8, budget: usize) -> Result<()> {
     let engram_dir = storage::find_engram_dir(path)?;
-    let today = Local::now().date_naive();
+    let today = Utc::now();
 
     let mut visited = HashSet::new();
     let mut queue = BinaryHeap::new();

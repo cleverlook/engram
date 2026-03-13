@@ -1,4 +1,4 @@
-use chrono::NaiveDate;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -38,8 +38,8 @@ pub struct Node {
     pub source_files: Vec<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub source_hash: Option<String>,
-    pub created: NaiveDate,
-    pub touched: NaiveDate,
+    pub created: DateTime<Utc>,
+    pub touched: DateTime<Utc>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub data_lake: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]

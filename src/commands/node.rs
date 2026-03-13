@@ -1,5 +1,5 @@
 use anyhow::{Result, bail};
-use chrono::Local;
+use chrono::Utc;
 use dialoguer::{Confirm, Input, Select};
 use std::io::{self, IsTerminal, Read};
 use std::path::Path;
@@ -45,7 +45,7 @@ pub fn create(
     let input = if edit {
         let id_str = id.unwrap_or_else(|| "namespace:node_name".to_string());
         let content_str = content.unwrap_or_else(|| "Describe the knowledge here.".to_string());
-        let today = Local::now().date_naive().to_string();
+        let today = Utc::now().to_rfc3339();
 
         let template = NODE_TEMPLATE
             .replace("{id}", &id_str)
@@ -56,7 +56,7 @@ pub fn create(
         edit_in_editor(&template)?
     } else if let Some(id) = id {
         let content = content.unwrap_or_else(|| "TODO: add content".to_string());
-        let today = Local::now().date_naive().to_string();
+        let today = Utc::now().to_rfc3339();
 
         NODE_TEMPLATE
             .replace("{id}", &id)
@@ -145,7 +145,7 @@ pub fn update(
         serde_yaml::from_str(&buf)?
     };
 
-    node.touched = Local::now().date_naive();
+    node.touched = Utc::now();
 
     indexing::remove_backlinks_from_source(&engram_dir, id, &existing)?;
     storage::save_node(&engram_dir, &node)?;
@@ -161,7 +161,7 @@ pub fn deprecate(path: &Path, id: &str) -> Result<()> {
     let mut node = storage::load_node(&engram_dir, id)?;
 
     node.status = NodeStatus::Deprecated;
-    node.touched = Local::now().date_naive();
+    node.touched = Utc::now();
 
     storage::save_node(&engram_dir, &node)?;
     indexing::remove_from_index(&engram_dir, id)?;
@@ -182,7 +182,7 @@ fn interactive_create() -> Result<String> {
         .default("50".to_string())
         .interact_text()?;
 
-    let today = Local::now().date_naive().to_string();
+    let today = Utc::now().to_rfc3339();
 
     let mut yaml = NODE_TEMPLATE
         .replace("{id}", &id)

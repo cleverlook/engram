@@ -1,5 +1,5 @@
 use anyhow::Result;
-use chrono::Local;
+use chrono::Utc;
 use console::style;
 use std::fs;
 use std::path::Path;
@@ -10,7 +10,7 @@ use crate::storage;
 pub fn run(path: &Path) -> Result<()> {
     let engram_dir = storage::find_engram_dir(path)?;
     let nodes = storage::load_all_nodes(&engram_dir)?;
-    let today = Local::now().date_naive();
+    let today = Utc::now();
 
     let mut dirty_count = 0u32;
     let mut stale_count = 0u32;

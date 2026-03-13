@@ -9,8 +9,8 @@ weight: 75
 status: active
 source_files:
 - src/storage.rs
-created: 2026-03-13
-touched: 2026-03-13
+created: 2026-03-13T23:55:14Z
+touched: 2026-03-13T23:55:14Z
 edges:
 - to: arch:module_structure
   type: implements

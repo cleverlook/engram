@@ -6,8 +6,8 @@ const TEST_NODE: &str = r#"id: auth:oauth:google
 content: Google OAuth uses PKCE.
 weight: 65
 status: active
-created: 2024-03-10
-touched: 2024-03-10
+created: 2024-03-10T00:00:00Z
+touched: 2024-03-10T00:00:00Z
 edges:
   - to: redis:session_store
     type: uses
@@ -18,8 +18,8 @@ const TEST_NODE_REDIS: &str = r#"id: redis:session_store
 content: Redis stores session tokens.
 weight: 50
 status: active
-created: 2024-03-10
-touched: 2024-03-10
+created: 2024-03-10T00:00:00Z
+touched: 2024-03-10T00:00:00Z
 edges: []
 "#;
 

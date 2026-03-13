@@ -6,8 +6,8 @@ const NODE_A: &str = r#"id: auth:oauth:google
 content: Google OAuth uses Authorization Code Flow with PKCE.
 weight: 65
 status: active
-created: 2024-03-10
-touched: 2024-03-10
+created: 2024-03-10T00:00:00Z
+touched: 2024-03-10T00:00:00Z
 edges: []
 "#;
 
@@ -15,8 +15,8 @@ const NODE_B: &str = r#"id: redis:session_store
 content: Redis stores session tokens with 24h TTL.
 weight: 50
 status: active
-created: 2024-03-10
-touched: 2024-03-10
+created: 2024-03-10T00:00:00Z
+touched: 2024-03-10T00:00:00Z
 edges: []
 "#;
 

@@ -10,8 +10,8 @@ weight: 85
 status: active
 source_files:
 - src/commands/node.rs
-created: 2026-03-13
-touched: 2026-03-13
+created: 2026-03-13T23:54:17Z
+touched: 2026-03-13T23:54:17Z
 edges:
 - to: arch:module_structure
   type: related

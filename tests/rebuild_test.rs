@@ -11,8 +11,8 @@ fn test_rebuild_index_restores_indexes() {
 content: Test rebuild.
 weight: 50
 status: active
-created: 2024-03-10
-touched: 2024-03-10
+created: 2024-03-10T00:00:00Z
+touched: 2024-03-10T00:00:00Z
 edges: []
 "#;
     helpers::create_node(dir.path(), node);
@@ -40,8 +40,8 @@ fn test_rebuild_restores_search() {
 content: Unique searchable content for rebuild.
 weight: 50
 status: active
-created: 2024-03-10
-touched: 2024-03-10
+created: 2024-03-10T00:00:00Z
+touched: 2024-03-10T00:00:00Z
 edges: []
 "#;
     helpers::create_node(dir.path(), node);

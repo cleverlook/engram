@@ -10,8 +10,8 @@ weight: 75
 status: active
 source_files:
 - src/commands/status.rs
-created: 2026-03-13
-touched: 2026-03-13
+created: 2026-03-13T23:55:55Z
+touched: 2026-03-13T23:55:55Z
 edges:
 - to: arch:traversal
   type: related
