@@ -40,3 +40,5 @@
 {"timestamp":"2026-03-14T00:13:20.17234+01:00","action":"create","task_id":17,"detail":"Data lake commands: engram lake add/list/remove to manage artifacts linked to nodes"}
 {"timestamp":"2026-03-14T00:13:20.18646+01:00","action":"create","task_id":18,"detail":"TUI: ratatui-based interactive board for browsing/searching the node graph"}
 {"timestamp":"2026-03-14T00:13:20.200598+01:00","action":"create","task_id":19,"detail":"cargo-dist setup: automated GitHub Releases + Homebrew tap"}
+{"timestamp":"2026-03-14T00:18:59.1479+01:00","action":"move","task_id":14,"detail":"backlog -\u003e in-progress"}
+{"timestamp":"2026-03-14T00:20:47.708299+01:00","action":"move","task_id":14,"detail":"in-progress -\u003e done"}

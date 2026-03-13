@@ -15,3 +15,6 @@ nodes:
 - id: arch:node_lifecycle
   weight: 75
   status: active
+- id: arch:cli_modes
+  weight: 70
+  status: active

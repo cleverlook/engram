@@ -16,6 +16,9 @@ backlinks:
   - from: arch:node_lifecycle
     type: related
     weight: 50
+  - from: arch:cli_modes
+    type: related
+    weight: 50
 - node: arch:traversal
   incoming:
   - from: arch:node_lifecycle

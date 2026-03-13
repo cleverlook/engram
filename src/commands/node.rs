@@ -1,6 +1,7 @@
 use anyhow::{Result, bail};
 use chrono::Local;
-use std::io::{self, Read};
+use dialoguer::{Confirm, Input, Select};
+use std::io::{self, IsTerminal, Read};
 use std::path::Path;
 
 use crate::db;
@@ -40,6 +41,7 @@ pub fn create(
     edit: bool,
 ) -> Result<()> {
     let engram_dir = storage::find_engram_dir(path)?;
+    let is_tty = io::stdin().is_terminal();
 
     let input = if edit {
         let id_str = id.unwrap_or_else(|| "namespace:node_name".to_string());
@@ -62,20 +64,21 @@ pub fn create(
             .replace("{content}", &content)
             .replace("{weight}", &weight.to_string())
             .replace("{date}", &today)
+    } else if is_tty {
+        // Interactive mode
+        interactive_create()?
     } else {
+        // Stdin mode
         let mut buf = String::new();
         io::stdin().read_to_string(&mut buf)?;
         if buf.trim().is_empty() {
-            bail!(
-                "No input. Use: engram node create <id> --content \"...\" or --edit or pipe YAML to stdin."
-            );
+            bail!("No input on stdin.");
         }
         buf
     };
 
     let mut node: Node = serde_yaml::from_str(&input)?;
 
-    // Add data lake refs from flags
     for dl in data_lake {
         if !node.data_lake.contains(&dl) {
             node.data_lake.push(dl);
@@ -106,6 +109,7 @@ pub fn update(
 ) -> Result<()> {
     let engram_dir = storage::find_engram_dir(path)?;
     let existing = storage::load_node(&engram_dir, id)?;
+    let is_tty = io::stdin().is_terminal();
 
     let has_flags = content.is_some()
         || weight.is_some()
@@ -131,6 +135,8 @@ pub fn update(
         }
         node.data_lake.retain(|dl| !remove_data_lake.contains(dl));
         node
+    } else if is_tty {
+        interactive_update(&existing)?
     } else {
         let mut buf = String::new();
         io::stdin().read_to_string(&mut buf)?;
@@ -163,6 +169,107 @@ pub fn deprecate(path: &Path, id: &str) -> Result<()> {
     db::delete_node(&engram_dir, id)?;
     println!("Deprecated node '{}'", node.id);
     Ok(())
+}
+
+fn interactive_create() -> Result<String> {
+    let id: String = Input::new()
+        .with_prompt("Node id (e.g. auth:oauth:google)")
+        .interact_text()?;
+
+    let content: String = Input::new().with_prompt("Content").interact_text()?;
+
+    let weight: String = Input::new()
+        .with_prompt("Weight (0-100)")
+        .default("50".to_string())
+        .interact_text()?;
+
+    let today = Local::now().date_naive().to_string();
+
+    let mut yaml = NODE_TEMPLATE
+        .replace("{id}", &id)
+        .replace("{content}", &content)
+        .replace("{weight}", &weight)
+        .replace("{date}", &today);
+
+    // Ask about edges
+    while Confirm::new()
+        .with_prompt("Add an edge?")
+        .default(false)
+        .interact()?
+    {
+        let target: String = Input::new()
+            .with_prompt("  Target node id")
+            .interact_text()?;
+
+        let edge_types = &["uses", "depends_on", "implements", "rationale", "related"];
+        let edge_type_idx = Select::new()
+            .with_prompt("  Edge type")
+            .items(edge_types)
+            .default(0)
+            .interact()?;
+
+        let edge_weight: String = Input::new()
+            .with_prompt("  Edge weight (0-100)")
+            .default("50".to_string())
+            .interact_text()?;
+
+        // Append edge to yaml
+        if !yaml.contains("edges:") || yaml.contains("# edges:") {
+            yaml = yaml.replace("# edges:", "edges:");
+            yaml = yaml.replace(
+                "#   - to: namespace:node_id\n#     type: uses\n#     weight: 50",
+                &format!(
+                    "  - to: {}\n    type: {}\n    weight: {}",
+                    target, edge_types[edge_type_idx], edge_weight
+                ),
+            );
+        } else {
+            yaml.push_str(&format!(
+                "  - to: {}\n    type: {}\n    weight: {}\n",
+                target, edge_types[edge_type_idx], edge_weight
+            ));
+        }
+    }
+
+    Ok(yaml)
+}
+
+fn interactive_update(existing: &Node) -> Result<Node> {
+    let mut node = existing.clone();
+
+    let content: String = Input::new()
+        .with_prompt("Content")
+        .default(node.content.clone())
+        .interact_text()?;
+    node.content = content;
+
+    let weight: String = Input::new()
+        .with_prompt("Weight (0-100)")
+        .default(node.weight.to_string())
+        .interact_text()?;
+    node.weight = weight.parse().unwrap_or(node.weight);
+
+    let statuses = &["active", "dirty", "stale", "deprecated"];
+    let current_idx = match node.status {
+        NodeStatus::Active => 0,
+        NodeStatus::Dirty => 1,
+        NodeStatus::Stale => 2,
+        NodeStatus::Deprecated => 3,
+    };
+    let status_idx = Select::new()
+        .with_prompt("Status")
+        .items(statuses)
+        .default(current_idx)
+        .interact()?;
+    node.status = match status_idx {
+        0 => NodeStatus::Active,
+        1 => NodeStatus::Dirty,
+        2 => NodeStatus::Stale,
+        3 => NodeStatus::Deprecated,
+        _ => NodeStatus::Active,
+    };
+
+    Ok(node)
 }
 
 fn edit_in_editor(template: &str) -> Result<String> {

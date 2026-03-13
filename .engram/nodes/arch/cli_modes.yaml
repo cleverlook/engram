@@ -1,0 +1,20 @@
+id: arch:cli_modes
+content: |
+  Node create and update support four input modes, auto-detected:
+  1. Flags: engram node create my:node -c "content" -w 65
+  2. Interactive: runs when TTY detected, no id given (dialoguer prompts)
+  3. Editor: --edit flag opens $EDITOR with YAML template
+  4. Stdin: pipe YAML when not a TTY (for AI agents)
+  Detection: io::stdin().is_terminal() distinguishes interactive vs stdin.
+  Update also supports partial flags: --content, --weight, --add-data-lake, --remove-data-lake.
+weight: 70
+status: active
+source_files:
+- src/commands/node.rs
+- src/cli.rs
+created: 2026-03-14
+touched: 2026-03-14
+edges:
+- to: arch:data_flow
+  type: related
+  weight: 50
