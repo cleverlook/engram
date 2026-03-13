@@ -1,6 +1,7 @@
 mod cli;
 mod commands;
 mod db;
+mod indexing;
 mod models;
 mod storage;
 

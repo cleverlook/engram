@@ -18,3 +18,7 @@
 {"timestamp":"2026-03-13T22:52:27.917362+01:00","action":"move","task_id":4,"detail":"backlog -\u003e in-progress"}
 {"timestamp":"2026-03-13T23:02:08.47567+01:00","action":"move","task_id":4,"detail":"in-progress -\u003e done"}
 {"timestamp":"2026-03-13T23:02:08.490938+01:00","action":"move","task_id":5,"detail":"backlog -\u003e in-progress"}
+{"timestamp":"2026-03-13T23:05:26.999646+01:00","action":"move","task_id":5,"detail":"in-progress -\u003e done"}
+{"timestamp":"2026-03-13T23:05:27.01666+01:00","action":"move","task_id":6,"detail":"backlog -\u003e in-progress"}
+{"timestamp":"2026-03-13T23:14:42.64484+01:00","action":"move","task_id":6,"detail":"in-progress -\u003e done"}
+{"timestamp":"2026-03-13T23:14:42.659132+01:00","action":"move","task_id":7,"detail":"backlog -\u003e in-progress"}
