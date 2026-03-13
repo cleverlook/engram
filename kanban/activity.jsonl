@@ -1,0 +1,13 @@
+{"timestamp":"2026-03-13T22:38:27.415907+01:00","action":"create","task_id":1,"detail":"Project setup: add dependencies to Cargo.toml (clap, serde/serde_yaml, rusqlite, md5) and create module structure"}
+{"timestamp":"2026-03-13T22:38:27.429741+01:00","action":"create","task_id":2,"detail":"Data models: Node, Edge, Index, Backlinks structs with serde Serialize/Deserialize"}
+{"timestamp":"2026-03-13T22:38:27.442731+01:00","action":"create","task_id":3,"detail":"CLI skeleton: clap subcommands for all commands (init, node, search, traverse, backlinks, status, check, rebuild-index)"}
+{"timestamp":"2026-03-13T22:38:27.455657+01:00","action":"create","task_id":4,"detail":"init command: create .engram/ structure, .gitignore, empty _index.yaml, SQLite DB, SKILL.md"}
+{"timestamp":"2026-03-13T22:38:27.469396+01:00","action":"create","task_id":5,"detail":"Node CRUD: node get, create, update, deprecate — YAML read/write with schema validation"}
+{"timestamp":"2026-03-13T22:38:27.48227+01:00","action":"create","task_id":6,"detail":"Index management: update _index.yaml and _backlinks.yaml on node create/update/deprecate"}
+{"timestamp":"2026-03-13T22:38:27.495207+01:00","action":"create","task_id":7,"detail":"SQLite FTS5: create tables, sync on CRUD operations"}
+{"timestamp":"2026-03-13T22:38:27.508813+01:00","action":"create","task_id":8,"detail":"search command: full-text search via FTS5 with fallback to YAML scan"}
+{"timestamp":"2026-03-13T22:38:27.522686+01:00","action":"create","task_id":9,"detail":"traverse command: weighted BFS with budget/depth/min-weight params"}
+{"timestamp":"2026-03-13T22:38:27.536218+01:00","action":"create","task_id":10,"detail":"backlinks command: read and display _backlinks.yaml for a given node"}
+{"timestamp":"2026-03-13T22:38:27.549556+01:00","action":"create","task_id":11,"detail":"status command: dirty detection (md5), stale detection, weight decay"}
+{"timestamp":"2026-03-13T22:38:27.562716+01:00","action":"create","task_id":12,"detail":"check command: validate graph integrity (broken edges, orphans, broken data_lake refs)"}
+{"timestamp":"2026-03-13T22:38:27.576058+01:00","action":"create","task_id":13,"detail":"rebuild-index command: full rebuild of _index.yaml, _backlinks.yaml, and SQLite"}
