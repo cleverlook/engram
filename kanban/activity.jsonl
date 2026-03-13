@@ -34,3 +34,9 @@
 {"timestamp":"2026-03-13T23:20:04.342359+01:00","action":"move","task_id":12,"detail":"backlog -\u003e in-progress"}
 {"timestamp":"2026-03-13T23:20:46.513778+01:00","action":"move","task_id":12,"detail":"in-progress -\u003e done"}
 {"timestamp":"2026-03-13T23:20:46.527657+01:00","action":"move","task_id":13,"detail":"backlog -\u003e done"}
+{"timestamp":"2026-03-14T00:13:20.127298+01:00","action":"create","task_id":14,"detail":"Interactive node create: dialoguer prompts for id, content, weight, edges"}
+{"timestamp":"2026-03-14T00:13:20.142513+01:00","action":"create","task_id":15,"detail":"Shell completions: clap_complete for zsh/bash/fish via engram completion"}
+{"timestamp":"2026-03-14T00:13:20.157691+01:00","action":"create","task_id":16,"detail":"Rich output: colored/styled CLI output with console crate"}
+{"timestamp":"2026-03-14T00:13:20.17234+01:00","action":"create","task_id":17,"detail":"Data lake commands: engram lake add/list/remove to manage artifacts linked to nodes"}
+{"timestamp":"2026-03-14T00:13:20.18646+01:00","action":"create","task_id":18,"detail":"TUI: ratatui-based interactive board for browsing/searching the node graph"}
+{"timestamp":"2026-03-14T00:13:20.200598+01:00","action":"create","task_id":19,"detail":"cargo-dist setup: automated GitHub Releases + Homebrew tap"}
