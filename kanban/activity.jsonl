@@ -24,3 +24,8 @@
 {"timestamp":"2026-03-13T23:14:42.659132+01:00","action":"move","task_id":7,"detail":"backlog -\u003e in-progress"}
 {"timestamp":"2026-03-13T23:15:54.15804+01:00","action":"move","task_id":7,"detail":"in-progress -\u003e done"}
 {"timestamp":"2026-03-13T23:15:54.172357+01:00","action":"move","task_id":8,"detail":"backlog -\u003e in-progress"}
+{"timestamp":"2026-03-13T23:17:15.554266+01:00","action":"move","task_id":8,"detail":"in-progress -\u003e done"}
+{"timestamp":"2026-03-13T23:17:15.568956+01:00","action":"move","task_id":9,"detail":"backlog -\u003e in-progress"}
+{"timestamp":"2026-03-13T23:18:27.473731+01:00","action":"move","task_id":9,"detail":"in-progress -\u003e done"}
+{"timestamp":"2026-03-13T23:18:27.494284+01:00","action":"move","task_id":10,"detail":"backlog -\u003e in-progress"}
+{"timestamp":"2026-03-13T23:18:55.069885+01:00","action":"move","task_id":10,"detail":"in-progress -\u003e done"}
