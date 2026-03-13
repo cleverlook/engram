@@ -29,8 +29,11 @@ Integration tests live in `tests/` and run the compiled binary against a `tempfi
 - **serde + serde_yaml** — YAML serialization/deserialization
 - **rusqlite** (bundled, vtab) — SQLite for FTS5 full-text search
 - **md5** — Source file hash for dirty detection
-- **chrono** — Date handling
+- **chrono** — UTC DateTime handling
 - **anyhow** — Error handling
+- **dialoguer** — Interactive CLI prompts
+- **console** — Colored/styled terminal output
+- **clap_complete** — Shell completions (zsh/bash/fish/powershell)
 
 ## Architecture
 
@@ -43,18 +46,20 @@ src/
 ├── storage.rs        — Node id ↔ filesystem path mapping, load/save, find .engram/
 ├── db.rs             — SQLite: open, create tables, upsert/delete/search/rebuild
 ├── indexing.rs       — _index.yaml and _backlinks.yaml management
+├── output.rs         — Colored CLI output formatting (console crate)
 ├── models/
 │   ├── node.rs       — Node, Edge, NodeStatus, EdgeType
 │   ├── index.rs      — NamespaceIndex, IndexEntry, NamespaceSummary
 │   └── backlinks.rs  — NamespaceBacklinks, NodeBacklinks, IncomingEdge
 └── commands/
     ├── init.rs       — Create .engram/ structure, SQLite, SKILL.md
-    ├── node.rs       — CRUD: get, create, update, deprecate
+    ├── node.rs       — CRUD: get, create, update, deprecate (4 input modes)
     ├── search.rs     — FTS5 full-text search
     ├── traverse.rs   — Weighted BFS graph traversal
     ├── backlinks.rs  — Display incoming edges
     ├── status.rs     — Dirty detection, stale reporting, weight decay
     ├── check.rs      — Graph integrity validation
+    ├── lake.rs       — Data lake artifact management (add/list/remove)
     └── rebuild_index.rs — Full rebuild of indexes, backlinks, SQLite
 ```
 
@@ -71,10 +76,12 @@ Every node mutation (create/update/deprecate) triggers three side effects in ord
 - **Namespace hierarchy maps to filesystem.** Node id `auth:oauth:google` → `nodes/auth/oauth/google.yaml`. The `storage::node_path()` function handles this mapping.
 - **`.engram/` is discovered by walking upward** from cwd, similar to how git finds `.git/`. See `storage::find_engram_dir()`.
 - **Templates live in `templates/`** and are embedded via `include_str!()` at compile time.
+- **Timestamps are UTC DateTime** (`chrono::DateTime<Utc>`), serialized as RFC 3339.
+- **Node create/update support 4 input modes**: flags, interactive (TTY auto-detected via `IsTerminal`), `$EDITOR`, stdin pipe.
 
 ### CLI Commands
 
-`init` | `node get/create/update/deprecate` | `search` | `traverse` | `backlinks` | `status` | `check` | `rebuild-index`
+`init` | `node get/create/update/deprecate` | `search` | `traverse` | `backlinks` | `status` | `check` | `rebuild-index` | `lake add/list/remove` | `completion`
 
 ### Core Algorithm
 

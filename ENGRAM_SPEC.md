@@ -110,8 +110,8 @@ status: active
 source_files:              # optional
   - src/auth/oauth/google.ts
 source_hash: a3f9c2        # optional, md5 of source_files at creation time
-created: 2024-03-10
-touched: 2024-03-10
+created: 2024-03-10T00:00:00Z
+touched: 2024-03-10T00:00:00Z
 data_lake:                 # optional, paths relative to .engram/data_lake/
   - meeting_notes_2024.md
   - diagrams/oauth_flow.png
@@ -134,8 +134,8 @@ edges:
 | `status` | enum | yes | active / dirty / stale / deprecated |
 | `source_files` | []string | no | Files this node was derived from |
 | `source_hash` | string | no | MD5 of source_files at creation time |
-| `created` | date | yes | ISO 8601 |
-| `touched` | date | yes | ISO 8601, updated on every traversal visit |
+| `created` | datetime | yes | ISO 8601 / RFC 3339 (UTC) |
+| `touched` | datetime | yes | ISO 8601 / RFC 3339 (UTC), updated on every traversal visit |
 | `data_lake` | []string | no | Paths relative to `.engram/data_lake/` |
 | `edges` | []Edge | no | Outgoing edges |
 
