@@ -3,6 +3,7 @@ use std::path::Path;
 use anyhow::{bail, Result};
 use chrono::Local;
 
+use crate::db;
 use crate::indexing;
 use crate::models::node::{Node, NodeStatus};
 use crate::storage;
@@ -36,6 +37,7 @@ pub fn create(path: &Path) -> Result<()> {
     storage::save_node(&engram_dir, &node)?;
     indexing::update_index_for_node(&engram_dir, &node)?;
     indexing::update_backlinks_for_node(&engram_dir, &node)?;
+    db::upsert_node(&engram_dir, &node)?;
     println!("Created node '{}'", node.id);
     Ok(())
 }
@@ -61,6 +63,7 @@ pub fn update(path: &Path, id: &str) -> Result<()> {
     storage::save_node(&engram_dir, &node)?;
     indexing::update_index_for_node(&engram_dir, &node)?;
     indexing::update_backlinks_for_node(&engram_dir, &node)?;
+    db::upsert_node(&engram_dir, &node)?;
     println!("Updated node '{}'", node.id);
     Ok(())
 }
@@ -74,6 +77,7 @@ pub fn deprecate(path: &Path, id: &str) -> Result<()> {
 
     storage::save_node(&engram_dir, &node)?;
     indexing::update_index_for_node(&engram_dir, &node)?;
+    db::upsert_node(&engram_dir, &node)?;
     println!("Deprecated node '{}'", node.id);
     Ok(())
 }
