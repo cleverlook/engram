@@ -13,7 +13,7 @@ fn test_init_creates_structure() {
     assert!(dir.path().join(".engram/.gitignore").is_file());
     assert!(dir.path().join(".engram/nodes/_index.yaml").is_file());
     assert!(dir.path().join(".engram/engram.db").is_file());
-    assert!(dir.path().join("SKILL.md").is_file());
+    assert!(dir.path().join(".claude/skills/engram/SKILL.md").is_file());
 }
 
 #[test]

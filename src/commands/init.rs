@@ -33,9 +33,11 @@ pub fn run(path: &Path) -> Result<()> {
     let conn = db::open(&engram_dir)?;
     db::create_tables(&conn)?;
 
-    // Create SKILL.md
-    fs::write(path.join("SKILL.md"), SKILL_MD)?;
-    println!("Created SKILL.md");
+    // Install skill for Claude Code
+    let skill_dir = path.join(".claude/skills/engram");
+    fs::create_dir_all(&skill_dir)?;
+    fs::write(skill_dir.join("SKILL.md"), SKILL_MD)?;
+    println!("Installed skill to .claude/skills/engram/");
 
     println!("Initialized .engram/ in {}", path.display());
     Ok(())
