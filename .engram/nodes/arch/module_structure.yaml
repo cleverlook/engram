@@ -1,0 +1,16 @@
+id: arch:module_structure
+content: |
+  The codebase is organized into modules:
+  - cli.rs: clap Parser/Subcommand definitions
+  - storage.rs: Node id to filesystem path mapping, load/save, find .engram/
+  - db.rs: SQLite operations (open, create tables, upsert, delete, search, rebuild)
+  - indexing.rs: _index.yaml and _backlinks.yaml management
+  - models/: Data structures (Node, Edge, Index, Backlinks)
+  - commands/: One file per CLI command (init, node, search, traverse, etc.)
+  Every node mutation triggers: YAML write -> index update -> SQLite sync.
+weight: 80
+status: active
+source_files:
+- src/main.rs
+created: 2026-03-13
+touched: 2026-03-13

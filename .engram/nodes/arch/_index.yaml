@@ -1,0 +1,5 @@
+namespace: arch
+nodes:
+- id: arch:module_structure
+  weight: 80
+  status: active

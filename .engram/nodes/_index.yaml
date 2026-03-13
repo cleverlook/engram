@@ -1,0 +1,3 @@
+namespaces:
+- name: arch
+  node_count: 1
