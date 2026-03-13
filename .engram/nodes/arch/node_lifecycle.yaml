@@ -1,0 +1,21 @@
+id: arch:node_lifecycle
+content: |
+  Nodes have status: active -> dirty -> stale -> deprecated.
+  dirty: source_files changed (md5 hash mismatch), detected by engram status.
+  stale: not touched in 30+ days, reported by engram status.
+  deprecated: manually set via engram node deprecate, removed from search index.
+  Weight decay runs during engram status: -1 after 30 days, -5 after 90 days untouched.
+  Weight increases +1 on each traversal visit (capped at 100).
+weight: 75
+status: active
+source_files:
+- src/commands/status.rs
+created: 2026-03-13
+touched: 2026-03-13
+edges:
+- to: arch:traversal
+  type: related
+  weight: 50
+- to: arch:data_flow
+  type: related
+  weight: 50

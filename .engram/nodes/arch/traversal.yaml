@@ -1,0 +1,17 @@
+id: arch:traversal
+content: |
+  Graph traversal uses weighted BFS with BinaryHeap (max-heap by edge weight).
+  Parameters: budget (default 4000 chars), max_depth (default 5), min_weight (default 0).
+  Behavior: skips deprecated nodes, annotates dirty nodes as [POSSIBLY STALE].
+  Side effects: updates touched date and increments weight (+1, capped at 100) for visited nodes.
+  Traversal stops on: cycle, budget exhausted, max depth, all neighbors visited.
+weight: 80
+status: active
+source_files:
+- src/commands/traverse.rs
+created: 2026-03-13
+touched: 2026-03-13
+edges:
+- to: arch:data_flow
+  type: uses
+  weight: 60

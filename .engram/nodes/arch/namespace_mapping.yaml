@@ -1,0 +1,17 @@
+id: arch:namespace_mapping
+content: |
+  Node ids use colon-separated namespaces that map directly to filesystem paths.
+  Example: auth:oauth:google -> .engram/nodes/auth/oauth/google.yaml
+  The storage::node_path() function handles this mapping.
+  storage::find_engram_dir() walks upward from cwd to find .engram/, like git finds .git/.
+  Each namespace directory has _index.yaml (node summaries) and _backlinks.yaml (incoming edges).
+weight: 75
+status: active
+source_files:
+- src/storage.rs
+created: 2026-03-13
+touched: 2026-03-13
+edges:
+- to: arch:module_structure
+  type: implements
+  weight: 60

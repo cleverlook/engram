@@ -3,3 +3,15 @@ nodes:
 - id: arch:module_structure
   weight: 80
   status: active
+- id: arch:data_flow
+  weight: 85
+  status: active
+- id: arch:namespace_mapping
+  weight: 75
+  status: active
+- id: arch:traversal
+  weight: 80
+  status: active
+- id: arch:node_lifecycle
+  weight: 75
+  status: active
