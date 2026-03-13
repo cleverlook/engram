@@ -30,7 +30,11 @@ fn test_node_create_and_get() {
     helpers::create_node(dir.path(), TEST_NODE);
 
     // Verify YAML file exists
-    assert!(dir.path().join(".engram/nodes/auth/oauth/google.yaml").is_file());
+    assert!(
+        dir.path()
+            .join(".engram/nodes/auth/oauth/google.yaml")
+            .is_file()
+    );
 
     // Verify get works
     let output = helpers::run_engram(dir.path(), &["node", "get", "auth:oauth:google"]);
@@ -56,7 +60,12 @@ fn test_node_create_duplicate_fails() {
         .spawn()
         .and_then(|mut child| {
             use std::io::Write;
-            child.stdin.take().unwrap().write_all(TEST_NODE.as_bytes()).unwrap();
+            child
+                .stdin
+                .take()
+                .unwrap()
+                .write_all(TEST_NODE.as_bytes())
+                .unwrap();
             child.wait_with_output()
         })
         .unwrap();
@@ -93,7 +102,8 @@ fn test_index_updated_on_create() {
     helpers::create_node(dir.path(), TEST_NODE);
 
     // Check namespace index
-    let index = std::fs::read_to_string(dir.path().join(".engram/nodes/auth/oauth/_index.yaml")).unwrap();
+    let index =
+        std::fs::read_to_string(dir.path().join(".engram/nodes/auth/oauth/_index.yaml")).unwrap();
     assert!(index.contains("auth:oauth:google"));
 
     // Check top-level index

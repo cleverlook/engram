@@ -15,7 +15,11 @@ pub fn setup_engram(dir: &std::path::Path) {
         .current_dir(dir)
         .output()
         .expect("failed to run engram init");
-    assert!(output.status.success(), "engram init failed: {}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "engram init failed: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
 }
 
 pub fn create_node(dir: &std::path::Path, yaml: &str) {
@@ -32,7 +36,11 @@ pub fn create_node(dir: &std::path::Path, yaml: &str) {
             child.wait_with_output()
         })
         .expect("failed to run engram node create");
-    assert!(output.status.success(), "node create failed: {}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "node create failed: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
 }
 
 pub fn run_engram(dir: &std::path::Path, args: &[&str]) -> std::process::Output {

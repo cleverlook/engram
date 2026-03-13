@@ -20,16 +20,19 @@ pub fn run(path: &Path) -> Result<()> {
 
         // Dirty detection: check source_hash against current files
         if !node.source_files.is_empty()
-            && let Some(ref stored_hash) = node.source_hash {
-                let current_hash = compute_source_hash(path, &node.source_files);
-                if let Some(ref hash) = current_hash
-                    && hash != stored_hash && node.status == NodeStatus::Active {
-                        node.status = NodeStatus::Dirty;
-                        changed = true;
-                        dirty_count += 1;
-                        println!("  dirty: {} (source files changed)", node.id);
-                    }
+            && let Some(ref stored_hash) = node.source_hash
+        {
+            let current_hash = compute_source_hash(path, &node.source_files);
+            if let Some(ref hash) = current_hash
+                && hash != stored_hash
+                && node.status == NodeStatus::Active
+            {
+                node.status = NodeStatus::Dirty;
+                changed = true;
+                dirty_count += 1;
+                println!("  dirty: {} (source files changed)", node.id);
             }
+        }
 
         // Stale detection
         let days_untouched = (today - node.touched).num_days();

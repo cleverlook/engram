@@ -65,12 +65,39 @@ pub enum NodeAction {
         /// Node id
         id: String,
     },
-    /// Create a new node (stdin or $EDITOR)
-    Create,
+    /// Create a new node
+    Create {
+        /// Node id (e.g. auth:oauth:google)
+        id: Option<String>,
+
+        /// Node content
+        #[arg(short, long)]
+        content: Option<String>,
+
+        /// Node weight (0-100)
+        #[arg(short, long, default_value_t = 50)]
+        weight: u8,
+
+        /// Open $EDITOR to create node
+        #[arg(short, long)]
+        edit: bool,
+    },
     /// Update an existing node
     Update {
         /// Node id
         id: String,
+
+        /// New content
+        #[arg(short, long)]
+        content: Option<String>,
+
+        /// New weight (0-100)
+        #[arg(short, long)]
+        weight: Option<u8>,
+
+        /// Open $EDITOR with current node content
+        #[arg(short, long)]
+        edit: bool,
     },
     /// Mark a node as deprecated
     Deprecate {

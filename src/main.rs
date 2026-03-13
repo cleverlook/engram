@@ -17,8 +17,18 @@ fn main() -> anyhow::Result<()> {
         Command::Init => commands::init::run(&cwd),
         Command::Node { action } => match action {
             NodeAction::Get { id } => commands::node::get(&cwd, &id),
-            NodeAction::Create => commands::node::create(&cwd),
-            NodeAction::Update { id } => commands::node::update(&cwd, &id),
+            NodeAction::Create {
+                id,
+                content,
+                weight,
+                edit,
+            } => commands::node::create(&cwd, id, content, weight, edit),
+            NodeAction::Update {
+                id,
+                content,
+                weight,
+                edit,
+            } => commands::node::update(&cwd, &id, content, weight, edit),
             NodeAction::Deprecate { id } => commands::node::deprecate(&cwd, &id),
         },
         Command::Search { query } => commands::search::run(&cwd, &query),

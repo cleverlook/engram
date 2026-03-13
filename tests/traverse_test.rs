@@ -69,7 +69,10 @@ fn test_traverse_respects_depth() {
     helpers::create_node(dir.path(), NODE_REDIS);
     helpers::create_node(dir.path(), NODE_FLOW);
 
-    let output = helpers::run_engram(dir.path(), &["traverse", "auth:oauth:google", "--depth", "0"]);
+    let output = helpers::run_engram(
+        dir.path(),
+        &["traverse", "auth:oauth:google", "--depth", "0"],
+    );
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
 
@@ -114,7 +117,10 @@ fn test_traverse_respects_min_weight() {
     helpers::create_node(dir.path(), NODE_FLOW);
 
     // min-weight 85 should only follow edge with weight 90 (flow), skip 80 (redis)
-    let output = helpers::run_engram(dir.path(), &["traverse", "auth:oauth:google", "--min-weight", "85"]);
+    let output = helpers::run_engram(
+        dir.path(),
+        &["traverse", "auth:oauth:google", "--min-weight", "85"],
+    );
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
 

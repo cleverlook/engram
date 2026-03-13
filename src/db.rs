@@ -114,11 +114,12 @@ fn rebuild_from_dir(conn: &Connection, dir: &Path) -> Result<()> {
                 continue; // skip _index.yaml, _backlinks.yaml
             }
             if let Ok(content) = std::fs::read_to_string(&path)
-                && let Ok(node) = serde_yaml::from_str::<Node>(&content) {
-                    let status_str = serde_yaml::to_string(&node.status)?;
-                    let namespace = namespace_of(&node.id);
+                && let Ok(node) = serde_yaml::from_str::<Node>(&content)
+            {
+                let status_str = serde_yaml::to_string(&node.status)?;
+                let namespace = namespace_of(&node.id);
 
-                    conn.execute(
+                conn.execute(
                         "INSERT OR REPLACE INTO nodes (id, namespace, weight, status, source_hash, touched)
                          VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
                         rusqlite::params![
@@ -130,11 +131,11 @@ fn rebuild_from_dir(conn: &Connection, dir: &Path) -> Result<()> {
                             node.touched.to_string(),
                         ],
                     )?;
-                    conn.execute(
-                        "INSERT INTO nodes_fts (id, content, tags) VALUES (?1, ?2, ?3)",
-                        rusqlite::params![node.id, node.content, ""],
-                    )?;
-                }
+                conn.execute(
+                    "INSERT INTO nodes_fts (id, content, tags) VALUES (?1, ?2, ?3)",
+                    rusqlite::params![node.id, node.content, ""],
+                )?;
+            }
         }
     }
 
