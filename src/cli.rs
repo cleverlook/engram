@@ -56,6 +56,13 @@ pub enum Command {
 
     /// Rebuild _index.yaml, _backlinks.yaml, and SQLite
     RebuildIndex,
+
+    /// Generate shell completions
+    Completion {
+        /// Shell to generate completions for
+        #[arg(value_enum)]
+        shell: clap_complete::Shell,
+    },
 }
 
 #[derive(Subcommand)]

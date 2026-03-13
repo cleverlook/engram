@@ -42,3 +42,5 @@
 {"timestamp":"2026-03-14T00:13:20.200598+01:00","action":"create","task_id":19,"detail":"cargo-dist setup: automated GitHub Releases + Homebrew tap"}
 {"timestamp":"2026-03-14T00:18:59.1479+01:00","action":"move","task_id":14,"detail":"backlog -\u003e in-progress"}
 {"timestamp":"2026-03-14T00:20:47.708299+01:00","action":"move","task_id":14,"detail":"in-progress -\u003e done"}
+{"timestamp":"2026-03-14T00:21:54.062266+01:00","action":"move","task_id":15,"detail":"backlog -\u003e in-progress"}
+{"timestamp":"2026-03-14T00:23:11.115667+01:00","action":"move","task_id":15,"detail":"in-progress -\u003e done"}

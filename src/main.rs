@@ -5,7 +5,8 @@ mod indexing;
 mod models;
 mod storage;
 
-use clap::Parser;
+use clap::{CommandFactory, Parser};
+use clap_complete::generate;
 use cli::{Cli, Command, NodeAction};
 use std::env;
 
@@ -53,5 +54,9 @@ fn main() -> anyhow::Result<()> {
         Command::Status => commands::status::run(&cwd),
         Command::Check => commands::check::run(&cwd),
         Command::RebuildIndex => commands::rebuild_index::run(&cwd),
+        Command::Completion { shell } => {
+            generate(shell, &mut Cli::command(), "engram", &mut std::io::stdout());
+            Ok(())
+        }
     }
 }
