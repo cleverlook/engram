@@ -16,3 +16,5 @@
 {"timestamp":"2026-03-13T22:52:27.885923+01:00","action":"move","task_id":2,"detail":"backlog -\u003e done"}
 {"timestamp":"2026-03-13T22:52:27.901581+01:00","action":"move","task_id":3,"detail":"backlog -\u003e done"}
 {"timestamp":"2026-03-13T22:52:27.917362+01:00","action":"move","task_id":4,"detail":"backlog -\u003e in-progress"}
+{"timestamp":"2026-03-13T23:02:08.47567+01:00","action":"move","task_id":4,"detail":"in-progress -\u003e done"}
+{"timestamp":"2026-03-13T23:02:08.490938+01:00","action":"move","task_id":5,"detail":"backlog -\u003e in-progress"}

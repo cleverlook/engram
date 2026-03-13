@@ -2,6 +2,7 @@ mod cli;
 mod commands;
 mod db;
 mod models;
+mod storage;
 
 use std::env;
 use clap::Parser;
