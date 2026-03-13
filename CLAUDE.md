@@ -13,9 +13,14 @@ cargo build              # Build the project
 cargo run                # Run the CLI
 cargo test               # Run all tests
 cargo test <test_name>   # Run a single test
+cargo test --test init_test  # Run a specific test file
 cargo clippy             # Lint
 cargo fmt                # Format code
 ```
+
+## Testing
+
+Integration tests live in `tests/` and run the compiled binary against a `tempfile::TempDir`. Each test creates a fresh `.engram/` via `helpers::setup_engram()`. Test files are organized by feature: `init_test.rs`, `node_test.rs`, `search_test.rs`, `traverse_test.rs`, `status_check_test.rs`, `rebuild_test.rs`. Shared helpers are in `tests/helpers.rs`.
 
 ## Tech Stack
 

@@ -87,6 +87,7 @@ pub fn search(engram_dir: &Path, query: &str) -> Result<Vec<String>> {
 /// Rebuild all SQLite data from YAML files.
 pub fn rebuild(engram_dir: &Path) -> Result<()> {
     let conn = open(engram_dir)?;
+    create_tables(&conn)?;
     conn.execute("DELETE FROM nodes", [])?;
     conn.execute("DELETE FROM nodes_fts", [])?;
 
