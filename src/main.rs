@@ -1,5 +1,6 @@
 mod cli;
 mod commands;
+mod db;
 mod models;
 
 use std::env;

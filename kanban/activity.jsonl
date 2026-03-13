@@ -12,3 +12,7 @@
 {"timestamp":"2026-03-13T22:38:27.562716+01:00","action":"create","task_id":12,"detail":"check command: validate graph integrity (broken edges, orphans, broken data_lake refs)"}
 {"timestamp":"2026-03-13T22:38:27.576058+01:00","action":"create","task_id":13,"detail":"rebuild-index command: full rebuild of _index.yaml, _backlinks.yaml, and SQLite"}
 {"timestamp":"2026-03-13T22:40:40.625089+01:00","action":"move","task_id":1,"detail":"backlog -\u003e in-progress"}
+{"timestamp":"2026-03-13T22:52:27.870332+01:00","action":"move","task_id":1,"detail":"in-progress -\u003e done"}
+{"timestamp":"2026-03-13T22:52:27.885923+01:00","action":"move","task_id":2,"detail":"backlog -\u003e done"}
+{"timestamp":"2026-03-13T22:52:27.901581+01:00","action":"move","task_id":3,"detail":"backlog -\u003e done"}
+{"timestamp":"2026-03-13T22:52:27.917362+01:00","action":"move","task_id":4,"detail":"backlog -\u003e in-progress"}
