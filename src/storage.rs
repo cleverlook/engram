@@ -42,6 +42,37 @@ pub fn load_node(engram_dir: &Path, id: &str) -> Result<Node> {
     Ok(node)
 }
 
+/// Walk all node YAML files and load them.
+pub fn load_all_nodes(engram_dir: &Path) -> Result<Vec<Node>> {
+    let nodes_dir = engram_dir.join("nodes");
+    let mut nodes = Vec::new();
+    walk_nodes(&nodes_dir, &mut nodes)?;
+    Ok(nodes)
+}
+
+fn walk_nodes(dir: &Path, nodes: &mut Vec<Node>) -> Result<()> {
+    if !dir.is_dir() {
+        return Ok(());
+    }
+    for entry in fs::read_dir(dir)? {
+        let entry = entry?;
+        let path = entry.path();
+        if path.is_dir() {
+            walk_nodes(&path, nodes)?;
+        } else if path.extension().is_some_and(|e| e == "yaml") {
+            let filename = path.file_name().unwrap().to_string_lossy();
+            if filename.starts_with('_') {
+                continue;
+            }
+            let content = fs::read_to_string(&path)?;
+            if let Ok(node) = serde_yaml::from_str::<Node>(&content) {
+                nodes.push(node);
+            }
+        }
+    }
+    Ok(())
+}
+
 pub fn save_node(engram_dir: &Path, node: &Node) -> Result<()> {
     let path = node_path(engram_dir, &node.id);
     if let Some(parent) = path.parent() {
