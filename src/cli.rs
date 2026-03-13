@@ -78,6 +78,10 @@ pub enum NodeAction {
         #[arg(short, long, default_value_t = 50)]
         weight: u8,
 
+        /// Link data lake files (repeatable)
+        #[arg(short, long)]
+        data_lake: Vec<String>,
+
         /// Open $EDITOR to create node
         #[arg(short, long)]
         edit: bool,
@@ -94,6 +98,14 @@ pub enum NodeAction {
         /// New weight (0-100)
         #[arg(short, long)]
         weight: Option<u8>,
+
+        /// Add data lake files (repeatable)
+        #[arg(long)]
+        add_data_lake: Vec<String>,
+
+        /// Remove data lake files (repeatable)
+        #[arg(long)]
+        remove_data_lake: Vec<String>,
 
         /// Open $EDITOR with current node content
         #[arg(short, long)]

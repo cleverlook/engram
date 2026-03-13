@@ -36,12 +36,12 @@ pub fn create(
     id: Option<String>,
     content: Option<String>,
     weight: u8,
+    data_lake: Vec<String>,
     edit: bool,
 ) -> Result<()> {
     let engram_dir = storage::find_engram_dir(path)?;
 
     let input = if edit {
-        // Mode 3: open $EDITOR with template
         let id_str = id.unwrap_or_else(|| "namespace:node_name".to_string());
         let content_str = content.unwrap_or_else(|| "Describe the knowledge here.".to_string());
         let today = Local::now().date_naive().to_string();
@@ -54,7 +54,6 @@ pub fn create(
 
         edit_in_editor(&template)?
     } else if let Some(id) = id {
-        // Mode 2: flags
         let content = content.unwrap_or_else(|| "TODO: add content".to_string());
         let today = Local::now().date_naive().to_string();
 
@@ -64,7 +63,6 @@ pub fn create(
             .replace("{weight}", &weight.to_string())
             .replace("{date}", &today)
     } else {
-        // Mode 1: stdin
         let mut buf = String::new();
         io::stdin().read_to_string(&mut buf)?;
         if buf.trim().is_empty() {
@@ -75,7 +73,14 @@ pub fn create(
         buf
     };
 
-    let node: Node = serde_yaml::from_str(&input)?;
+    let mut node: Node = serde_yaml::from_str(&input)?;
+
+    // Add data lake refs from flags
+    for dl in data_lake {
+        if !node.data_lake.contains(&dl) {
+            node.data_lake.push(dl);
+        }
+    }
 
     let node_path = storage::node_path(&engram_dir, &node.id);
     if node_path.exists() {
@@ -95,18 +100,23 @@ pub fn update(
     id: &str,
     content: Option<String>,
     weight: Option<u8>,
+    add_data_lake: Vec<String>,
+    remove_data_lake: Vec<String>,
     edit: bool,
 ) -> Result<()> {
     let engram_dir = storage::find_engram_dir(path)?;
     let existing = storage::load_node(&engram_dir, id)?;
 
+    let has_flags = content.is_some()
+        || weight.is_some()
+        || !add_data_lake.is_empty()
+        || !remove_data_lake.is_empty();
+
     let mut node = if edit {
-        // Mode: open in editor
         let existing_yaml = serde_yaml::to_string(&existing)?;
         let input = edit_in_editor(&existing_yaml)?;
         serde_yaml::from_str(&input)?
-    } else if content.is_some() || weight.is_some() {
-        // Mode: partial update via flags
+    } else if has_flags {
         let mut node = existing.clone();
         if let Some(c) = content {
             node.content = c;
@@ -114,9 +124,14 @@ pub fn update(
         if let Some(w) = weight {
             node.weight = w;
         }
+        for dl in &add_data_lake {
+            if !node.data_lake.contains(dl) {
+                node.data_lake.push(dl.clone());
+            }
+        }
+        node.data_lake.retain(|dl| !remove_data_lake.contains(dl));
         node
     } else {
-        // Mode: full YAML from stdin
         let mut buf = String::new();
         io::stdin().read_to_string(&mut buf)?;
         if buf.trim().is_empty() {
