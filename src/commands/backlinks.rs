@@ -1,4 +1,5 @@
 use anyhow::Result;
+use console::style;
 use std::fs;
 use std::path::Path;
 
@@ -11,7 +12,10 @@ pub fn run(path: &Path, id: &str) -> Result<()> {
     let bl_path = ns_dir.join("_backlinks.yaml");
 
     if !bl_path.exists() {
-        println!("No backlinks found for '{}'.", id);
+        println!(
+            "{}",
+            style(format!("No backlinks found for '{}'.", id)).dim()
+        );
         return Ok(());
     }
 
@@ -22,16 +26,22 @@ pub fn run(path: &Path, id: &str) -> Result<()> {
 
     match node_bl {
         Some(entry) => {
-            println!("Backlinks for '{}':", id);
+            println!("Backlinks for {}:", style(id).bold());
             for incoming in &entry.incoming {
                 println!(
-                    "  <- {} ({}, weight: {})",
-                    incoming.from, incoming.edge_type, incoming.weight
+                    "  {} {} {} {}",
+                    style("←").cyan(),
+                    style(&incoming.from).bold(),
+                    style(&incoming.edge_type).dim(),
+                    style(format!("w:{}", incoming.weight)).dim(),
                 );
             }
         }
         None => {
-            println!("No backlinks found for '{}'.", id);
+            println!(
+                "{}",
+                style(format!("No backlinks found for '{}'.", id)).dim()
+            );
         }
     }
 

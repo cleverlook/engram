@@ -1,7 +1,9 @@
 use anyhow::Result;
+use console::style;
 use std::path::Path;
 
 use crate::db;
+use crate::output;
 use crate::storage;
 
 pub fn run(path: &Path, query: &str) -> Result<()> {
@@ -9,18 +11,20 @@ pub fn run(path: &Path, query: &str) -> Result<()> {
     let ids = db::search(&engram_dir, query)?;
 
     if ids.is_empty() {
-        println!("No results found.");
+        println!("{}", style("No results found.").dim());
         return Ok(());
     }
 
-    for id in &ids {
+    println!("{}", style(format!("Found {} result(s):", ids.len())).dim());
+    println!();
+
+    for (i, id) in ids.iter().enumerate() {
         let node = storage::load_node(&engram_dir, id)?;
-        println!(
-            "--- {} (weight: {}, status: {:?}) ---",
-            node.id, node.weight, node.status
-        );
-        println!("{}", node.content.trim());
-        println!();
+        output::print_node_header(&node);
+        println!("  {}", node.content.trim().lines().next().unwrap_or(""));
+        if i < ids.len() - 1 {
+            println!();
+        }
     }
 
     Ok(())

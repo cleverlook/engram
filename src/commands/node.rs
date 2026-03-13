@@ -27,8 +27,7 @@ touched: {date}
 pub fn get(path: &Path, id: &str) -> Result<()> {
     let engram_dir = storage::find_engram_dir(path)?;
     let node = storage::load_node(&engram_dir, id)?;
-    let yaml = serde_yaml::to_string(&node)?;
-    print!("{}", yaml);
+    crate::output::print_node_full(&node);
     Ok(())
 }
 

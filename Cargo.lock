@@ -228,6 +228,7 @@ dependencies = [
  "chrono",
  "clap",
  "clap_complete",
+ "console",
  "dialoguer",
  "md5",
  "rusqlite",

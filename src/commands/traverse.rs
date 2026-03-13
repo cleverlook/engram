@@ -1,11 +1,13 @@
 use anyhow::Result;
 use chrono::Local;
+use console::style;
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashSet};
 use std::path::Path;
 
 use crate::db;
 use crate::models::node::NodeStatus;
+use crate::output;
 use crate::storage;
 
 #[derive(Eq, PartialEq)]
@@ -69,16 +71,12 @@ pub fn run(path: &Path, id: &str, max_depth: u32, min_weight: u8, budget: usize)
         visited.insert(entry.id.clone());
 
         // Print node
-        let stale_marker = if node.status == NodeStatus::Dirty {
-            " [POSSIBLY STALE]"
-        } else {
-            ""
-        };
-        println!(
-            "--- {} (weight: {}, depth: {}){} ---",
-            node.id, node.weight, entry.depth, stale_marker
-        );
-        println!("{}", node.content.trim());
+        if node.status == NodeStatus::Dirty {
+            print!("{} ", style("[POSSIBLY STALE]").yellow());
+        }
+        print!("{} ", style(format!("depth:{}", entry.depth)).dim());
+        output::print_node_header(&node);
+        println!("  {}", node.content.trim().lines().next().unwrap_or(""));
         println!();
 
         // Deduct from budget

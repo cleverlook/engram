@@ -1,5 +1,6 @@
 use anyhow::Result;
 use chrono::Local;
+use console::style;
 use std::fs;
 use std::path::Path;
 
@@ -30,7 +31,11 @@ pub fn run(path: &Path) -> Result<()> {
                 node.status = NodeStatus::Dirty;
                 changed = true;
                 dirty_count += 1;
-                println!("  dirty: {} (source files changed)", node.id);
+                println!(
+                    "  {} {} (source files changed)",
+                    style("dirty").yellow(),
+                    style(&node.id).bold()
+                );
             }
         }
 
@@ -38,7 +43,12 @@ pub fn run(path: &Path) -> Result<()> {
         let days_untouched = (today - node.touched).num_days();
         if days_untouched > 30 && node.status == NodeStatus::Active {
             stale_count += 1;
-            println!("  stale: {} ({} days untouched)", node.id, days_untouched);
+            println!(
+                "  {} {} ({} days untouched)",
+                style("stale").yellow(),
+                style(&node.id).bold(),
+                days_untouched
+            );
         }
 
         // Weight decay
@@ -66,7 +76,9 @@ pub fn run(path: &Path) -> Result<()> {
     println!();
     println!(
         "Status: {} dirty, {} stale, {} decayed",
-        dirty_count, stale_count, decayed_count
+        style(dirty_count).yellow().bold(),
+        style(stale_count).yellow(),
+        style(decayed_count).dim()
     );
     Ok(())
 }

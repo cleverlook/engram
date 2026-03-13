@@ -46,6 +46,7 @@ pub fn create_node(dir: &std::path::Path, yaml: &str) {
 pub fn run_engram(dir: &std::path::Path, args: &[&str]) -> std::process::Output {
     Command::new(engram_bin())
         .args(args)
+        .env("NO_COLOR", "1")
         .current_dir(dir)
         .output()
         .expect("failed to run engram")

@@ -47,7 +47,7 @@ edges: []
     // Verify weight actually decreased
     let output = helpers::run_engram(dir.path(), &["node", "get", "decay:test"]);
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("weight: 45")); // 50 - 5 (>90 days)
+    assert!(stdout.contains("w:45")); // 50 - 5 (>90 days)
 }
 
 #[test]
@@ -95,7 +95,7 @@ edges: []
     let output = helpers::run_engram(dir.path(), &["check"]);
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("broken data_lake ref"));
+    assert!(stdout.contains("broken data_lake"));
 }
 
 #[test]
@@ -116,5 +116,5 @@ edges: []
     let output = helpers::run_engram(dir.path(), &["check"]);
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("No issues found"));
+    assert!(stdout.contains("check passed"));
 }

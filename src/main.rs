@@ -3,6 +3,7 @@ mod commands;
 mod db;
 mod indexing;
 mod models;
+mod output;
 mod storage;
 
 use clap::{CommandFactory, Parser};
