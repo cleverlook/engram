@@ -53,3 +53,5 @@
 {"timestamp":"2026-03-14T00:36:02.261774+01:00","action":"move","task_id":20,"detail":"in-progress -\u003e done"}
 {"timestamp":"2026-03-14T00:36:43.717289+01:00","action":"move","task_id":19,"detail":"backlog -\u003e in-progress"}
 {"timestamp":"2026-03-14T00:47:00.584772+01:00","action":"move","task_id":19,"detail":"in-progress -\u003e done"}
+{"timestamp":"2026-03-14T01:24:00.381172+01:00","action":"create","task_id":21,"detail":"Auto-install shell completions: generate in build.rs, include in cargo-dist artifacts and homebrew formula"}
+{"timestamp":"2026-03-14T01:24:00.39784+01:00","action":"create","task_id":22,"detail":"Interactive init: detect agents (Claude/Codex/Cursor), prompt which skills to install"}
