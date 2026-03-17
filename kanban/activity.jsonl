@@ -57,3 +57,5 @@
 {"timestamp":"2026-03-14T01:24:00.39784+01:00","action":"create","task_id":22,"detail":"Interactive init: detect agents (Claude/Codex/Cursor), prompt which skills to install"}
 {"timestamp":"2026-03-17T14:18:21.509367+01:00","action":"move","task_id":21,"detail":"backlog -\u003e done"}
 {"timestamp":"2026-03-17T14:22:20.145873+01:00","action":"move","task_id":22,"detail":"backlog -\u003e done"}
+{"timestamp":"2026-03-17T17:43:37.802862+01:00","action":"create","task_id":23,"detail":"TUI: Graph navigation - interactive edge traversal with history stack"}
+{"timestamp":"2026-03-17T17:43:40.23543+01:00","action":"create","task_id":24,"detail":"TUI: In-app node editing (create/edit/deprecate/add edges)"}
