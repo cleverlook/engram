@@ -66,7 +66,13 @@ fn render(app: &App, frame: &mut Frame) {
 
     match app.view {
         View::NodeList => views::node_list::render(app, frame, chunks[0]),
-        _ => {} // Other views added in later tasks
+        View::NodeDetail => {
+            if let Some(node) = app.selected_node() {
+                let node = node.clone();
+                views::node_detail::render(&node, &app.detail_state, frame, chunks[0]);
+            }
+        }
+        _ => {} // Search added in Task 6
     }
 
     // Help bar
@@ -86,10 +92,25 @@ fn render(app: &App, frame: &mut Frame) {
 }
 
 fn handle_key(app: &mut App, key: KeyEvent) {
-    match key.code {
-        KeyCode::Char('q') => app.quit(),
-        KeyCode::Down | KeyCode::Char('j') => app.next(),
-        KeyCode::Up | KeyCode::Char('k') => app.previous(),
-        _ => {}
+    match app.view {
+        View::NodeList => match key.code {
+            KeyCode::Char('q') => app.quit(),
+            KeyCode::Down | KeyCode::Char('j') => app.next(),
+            KeyCode::Up | KeyCode::Char('k') => app.previous(),
+            KeyCode::Enter => app.enter_detail(),
+            KeyCode::Char('/') => app.enter_search(),
+            _ => {}
+        },
+        View::NodeDetail => match key.code {
+            KeyCode::Char('q') => app.quit(),
+            KeyCode::Esc => app.back(),
+            KeyCode::Down | KeyCode::Char('j') => app.detail_state.scroll_down(),
+            KeyCode::Up | KeyCode::Char('k') => app.detail_state.scroll_up(),
+            _ => {}
+        },
+        View::Search => match key.code {
+            KeyCode::Esc => app.back(),
+            _ => {} // Filled in Task 6
+        },
     }
 }
