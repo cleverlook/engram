@@ -1,3 +1,5 @@
+use tui_input::Input;
+
 use crate::models::node::Node;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -9,6 +11,38 @@ pub enum View {
 
 pub struct DetailState {
     pub scroll: u16,
+}
+
+pub struct SearchState {
+    pub input: Input,
+    pub results: Vec<String>, // node IDs
+    pub selected: usize,
+}
+
+impl SearchState {
+    pub fn new() -> Self {
+        Self {
+            input: Input::default(),
+            results: Vec::new(),
+            selected: 0,
+        }
+    }
+
+    pub fn next(&mut self) {
+        if !self.results.is_empty() {
+            self.selected = (self.selected + 1) % self.results.len();
+        }
+    }
+
+    pub fn previous(&mut self) {
+        if !self.results.is_empty() {
+            self.selected = if self.selected == 0 {
+                self.results.len() - 1
+            } else {
+                self.selected - 1
+            };
+        }
+    }
 }
 
 impl DetailState {
@@ -32,6 +66,7 @@ pub struct App {
     pub selected_index: usize,
     pub engram_dir: std::path::PathBuf,
     pub detail_state: DetailState,
+    pub search_state: SearchState,
 }
 
 impl App {
@@ -43,6 +78,7 @@ impl App {
             selected_index: 0,
             engram_dir,
             detail_state: DetailState::new(),
+            search_state: SearchState::new(),
         }
     }
 
@@ -85,7 +121,39 @@ impl App {
     }
 
     pub fn enter_search(&mut self) {
-        // Will be implemented in Task 6
+        self.search_state = SearchState::new();
         self.view = View::Search;
+    }
+
+    pub fn execute_search(&mut self) {
+        let query = self.search_state.input.value().trim().to_string();
+        if query.is_empty() {
+            self.search_state.results.clear();
+            return;
+        }
+        match crate::db::search(&self.engram_dir, &query) {
+            Ok(ids) => {
+                self.search_state.results = ids;
+                self.search_state.selected = 0;
+            }
+            Err(_) => {
+                self.search_state.results.clear();
+            }
+        }
+    }
+
+    pub fn open_search_result(&mut self) {
+        if let Some(id) = self
+            .search_state
+            .results
+            .get(self.search_state.selected)
+            .cloned()
+        {
+            if let Some(pos) = self.nodes.iter().position(|n| n.id == id) {
+                self.selected_index = pos;
+                self.detail_state = DetailState::new();
+                self.view = View::NodeDetail;
+            }
+        }
     }
 }

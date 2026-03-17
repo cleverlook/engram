@@ -72,7 +72,7 @@ fn render(app: &App, frame: &mut Frame) {
                 views::node_detail::render(&node, &app.detail_state, frame, chunks[0]);
             }
         }
-        _ => {} // Search added in Task 6
+        View::Search => views::search::render(&app.search_state, &app.nodes, frame, chunks[0]),
     }
 
     // Help bar
@@ -110,7 +110,16 @@ fn handle_key(app: &mut App, key: KeyEvent) {
         },
         View::Search => match key.code {
             KeyCode::Esc => app.back(),
-            _ => {} // Filled in Task 6
+            KeyCode::Enter => app.open_search_result(),
+            KeyCode::Down => app.search_state.next(),
+            KeyCode::Up => app.search_state.previous(),
+            _ => {
+                use tui_input::backend::crossterm::EventHandler;
+                app.search_state
+                    .input
+                    .handle_event(&crossterm::event::Event::Key(key));
+                app.execute_search();
+            }
         },
     }
 }
