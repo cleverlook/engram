@@ -1,5 +1,6 @@
 mod app;
 pub mod event;
+mod views;
 
 use std::io;
 use std::path::Path;
@@ -55,14 +56,33 @@ pub fn run(cwd: &Path) -> anyhow::Result<()> {
 }
 
 fn render(app: &App, frame: &mut Frame) {
-    // Placeholder — will be replaced in Task 4
     let area = frame.area();
-    let text = format!(
-        "engram tui — {} nodes loaded. Press q to quit.\nSelected: {}",
-        app.nodes.len(),
-        app.selected_node().map(|n| n.id.as_str()).unwrap_or("none"),
-    );
-    frame.render_widget(ratatui::widgets::Paragraph::new(text), area);
+
+    // Main layout: content + help bar at bottom
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Min(1), Constraint::Length(1)])
+        .split(area);
+
+    match app.view {
+        View::NodeList => views::node_list::render(app, frame, chunks[0]),
+        _ => {} // Other views added in later tasks
+    }
+
+    // Help bar
+    let help = Line::from(vec![
+        Span::styled(" q", Style::default().fg(Color::Yellow).bold()),
+        Span::raw(" quit  "),
+        Span::styled("j/k", Style::default().fg(Color::Yellow).bold()),
+        Span::raw(" navigate  "),
+        Span::styled("Enter", Style::default().fg(Color::Yellow).bold()),
+        Span::raw(" detail  "),
+        Span::styled("/", Style::default().fg(Color::Yellow).bold()),
+        Span::raw(" search  "),
+        Span::styled("Esc", Style::default().fg(Color::Yellow).bold()),
+        Span::raw(" back"),
+    ]);
+    frame.render_widget(help, chunks[1]);
 }
 
 fn handle_key(app: &mut App, key: KeyEvent) {
