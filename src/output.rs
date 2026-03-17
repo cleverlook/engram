@@ -46,7 +46,3 @@ pub fn print_node_full(node: &Node) {
         }
     }
 }
-
-pub fn print_separator() {
-    println!("{}", style("─".repeat(60)).dim());
-}
