@@ -85,6 +85,8 @@ fn render(app: &App, frame: &mut Frame) {
         Span::raw(" detail  "),
         Span::styled("/", Style::default().fg(Color::Yellow).bold()),
         Span::raw(" search  "),
+        Span::styled("s", Style::default().fg(Color::Yellow).bold()),
+        Span::raw(" sort  "),
         Span::styled("Esc", Style::default().fg(Color::Yellow).bold()),
         Span::raw(" back"),
     ]);
@@ -99,6 +101,7 @@ fn handle_key(app: &mut App, key: KeyEvent) {
             KeyCode::Up | KeyCode::Char('k') => app.previous(),
             KeyCode::Enter => app.enter_detail(),
             KeyCode::Char('/') => app.enter_search(),
+            KeyCode::Char('s') => app.cycle_sort(),
             _ => {}
         },
         View::NodeDetail => match key.code {

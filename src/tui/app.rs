@@ -9,6 +9,14 @@ pub enum View {
     Search,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SortBy {
+    Id,
+    Weight,
+    Touched,
+    Status,
+}
+
 pub struct DetailState {
     pub scroll: u16,
 }
@@ -67,10 +75,12 @@ pub struct App {
     pub engram_dir: std::path::PathBuf,
     pub detail_state: DetailState,
     pub search_state: SearchState,
+    pub sort_by: SortBy,
 }
 
 impl App {
-    pub fn new(nodes: Vec<Node>, engram_dir: std::path::PathBuf) -> Self {
+    pub fn new(mut nodes: Vec<Node>, engram_dir: std::path::PathBuf) -> Self {
+        nodes.sort_by(|a, b| a.id.cmp(&b.id));
         Self {
             running: true,
             view: View::NodeList,
@@ -79,6 +89,7 @@ impl App {
             engram_dir,
             detail_state: DetailState::new(),
             search_state: SearchState::new(),
+            sort_by: SortBy::Id,
         }
     }
 
@@ -153,6 +164,30 @@ impl App {
                 self.selected_index = pos;
                 self.detail_state = DetailState::new();
                 self.view = View::NodeDetail;
+            }
+        }
+    }
+
+    pub fn cycle_sort(&mut self) {
+        self.sort_by = match self.sort_by {
+            SortBy::Id => SortBy::Weight,
+            SortBy::Weight => SortBy::Touched,
+            SortBy::Touched => SortBy::Status,
+            SortBy::Status => SortBy::Id,
+        };
+        let selected_id = self.selected_node().map(|n| n.id.clone());
+        match self.sort_by {
+            SortBy::Id => self.nodes.sort_by(|a, b| a.id.cmp(&b.id)),
+            SortBy::Weight => self.nodes.sort_by(|a, b| b.weight.cmp(&a.weight)),
+            SortBy::Touched => self.nodes.sort_by(|a, b| b.touched.cmp(&a.touched)),
+            SortBy::Status => self
+                .nodes
+                .sort_by(|a, b| format!("{:?}", a.status).cmp(&format!("{:?}", b.status))),
+        }
+        // Preserve selection
+        if let Some(id) = selected_id {
+            if let Some(pos) = self.nodes.iter().position(|n| n.id == id) {
+                self.selected_index = pos;
             }
         }
     }

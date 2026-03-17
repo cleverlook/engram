@@ -45,7 +45,11 @@ fn render_list(app: &App, frame: &mut Frame, area: Rect) {
         .block(
             Block::default()
                 .borders(Borders::ALL)
-                .title(" Nodes ")
+                .title(format!(
+                    " Nodes ({}) [sort: {:?}] ",
+                    app.nodes.len(),
+                    app.sort_by
+                ))
                 .title_style(Style::default().bold()),
         )
         .highlight_style(
