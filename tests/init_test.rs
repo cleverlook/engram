@@ -13,18 +13,18 @@ fn test_init_creates_structure() {
     assert!(dir.path().join(".engram/.gitignore").is_file());
     assert!(dir.path().join(".engram/nodes/_index.yaml").is_file());
     assert!(dir.path().join(".engram/engram.db").is_file());
-    assert!(dir.path().join(".claude/skills/engram/SKILL.md").is_file());
+    // Agent skills are installed interactively (TTY) — not in tests
 }
 
 #[test]
-fn test_init_fails_if_already_exists() {
+fn test_init_skips_if_already_exists() {
     let dir = TempDir::new().unwrap();
     helpers::setup_engram(dir.path());
 
     let output = helpers::run_engram(dir.path(), &["init"]);
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("already exists"));
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("already exists"));
 }
 
 #[test]
