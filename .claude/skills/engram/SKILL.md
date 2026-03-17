@@ -1,3 +1,9 @@
+---
+name: engram
+description: Persistent structured memory for AI agents. Use when you need to store, retrieve, search, or traverse project knowledge. Use before starting work to load context, during work to pull related knowledge, and after work to save what you learned.
+allowed-tools: Bash(engram:*)
+---
+
 # engram — Memory
 
 This project has a persistent memory graph in `.engram/`.
