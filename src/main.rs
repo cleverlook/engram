@@ -5,6 +5,7 @@ mod indexing;
 mod models;
 mod output;
 mod storage;
+mod tui;
 
 use clap::{CommandFactory, Parser};
 use clap_complete::generate;
@@ -79,5 +80,6 @@ fn main() -> anyhow::Result<()> {
             println!("Generated completions in {}", outdir.display());
             Ok(())
         }
+        Command::Tui => tui::run(&cwd),
     }
 }

@@ -76,6 +76,9 @@ pub enum Command {
         /// Output directory
         outdir: String,
     },
+
+    /// Launch interactive TUI for browsing the node graph
+    Tui,
 }
 
 #[derive(Subcommand)]
