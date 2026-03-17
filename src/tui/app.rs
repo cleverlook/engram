@@ -192,3 +192,72 @@ impl App {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::Utc;
+
+    fn make_node(id: &str) -> Node {
+        Node {
+            id: id.to_string(),
+            content: format!("Content for {id}"),
+            weight: 50,
+            status: crate::models::node::NodeStatus::Active,
+            source_files: vec![],
+            source_hash: None,
+            created: Utc::now(),
+            touched: Utc::now(),
+            data_lake: vec![],
+            edges: vec![],
+        }
+    }
+
+    #[test]
+    fn navigation_wraps_around() {
+        let nodes = vec![make_node("a"), make_node("b"), make_node("c")];
+        let mut app = App::new(nodes, std::path::PathBuf::from("/tmp"));
+        assert_eq!(app.selected_index, 0);
+        app.previous(); // wrap to end
+        assert_eq!(app.selected_index, 2);
+        app.next(); // wrap to start
+        assert_eq!(app.selected_index, 0);
+    }
+
+    #[test]
+    fn enter_detail_and_back() {
+        let nodes = vec![make_node("a")];
+        let mut app = App::new(nodes, std::path::PathBuf::from("/tmp"));
+        app.enter_detail();
+        assert_eq!(app.view, View::NodeDetail);
+        app.back();
+        assert_eq!(app.view, View::NodeList);
+    }
+
+    #[test]
+    fn enter_search_and_back() {
+        let nodes = vec![make_node("a")];
+        let mut app = App::new(nodes, std::path::PathBuf::from("/tmp"));
+        app.enter_search();
+        assert_eq!(app.view, View::Search);
+        app.back();
+        assert_eq!(app.view, View::NodeList);
+    }
+
+    #[test]
+    fn empty_nodes_navigation_safe() {
+        let mut app = App::new(vec![], std::path::PathBuf::from("/tmp"));
+        app.next(); // should not panic
+        app.previous(); // should not panic
+        assert_eq!(app.selected_index, 0);
+        assert!(app.selected_node().is_none());
+    }
+
+    #[test]
+    fn quit_sets_running_false() {
+        let mut app = App::new(vec![], std::path::PathBuf::from("/tmp"));
+        assert!(app.running);
+        app.quit();
+        assert!(!app.running);
+    }
+}
