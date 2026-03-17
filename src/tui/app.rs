@@ -159,12 +159,11 @@ impl App {
             .results
             .get(self.search_state.selected)
             .cloned()
+            && let Some(pos) = self.nodes.iter().position(|n| n.id == id)
         {
-            if let Some(pos) = self.nodes.iter().position(|n| n.id == id) {
-                self.selected_index = pos;
-                self.detail_state = DetailState::new();
-                self.view = View::NodeDetail;
-            }
+            self.selected_index = pos;
+            self.detail_state = DetailState::new();
+            self.view = View::NodeDetail;
         }
     }
 
@@ -185,10 +184,10 @@ impl App {
                 .sort_by(|a, b| format!("{:?}", a.status).cmp(&format!("{:?}", b.status))),
         }
         // Preserve selection
-        if let Some(id) = selected_id {
-            if let Some(pos) = self.nodes.iter().position(|n| n.id == id) {
-                self.selected_index = pos;
-            }
+        if let Some(id) = selected_id
+            && let Some(pos) = self.nodes.iter().position(|n| n.id == id)
+        {
+            self.selected_index = pos;
         }
     }
 }

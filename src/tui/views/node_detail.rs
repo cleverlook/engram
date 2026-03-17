@@ -3,7 +3,7 @@ use ratatui::widgets::{
     Block, Borders, Paragraph, Scrollbar, ScrollbarOrientation, ScrollbarState, Wrap,
 };
 
-use crate::models::node::Node;
+use crate::models::node::{Node, NodeStatus};
 use crate::tui::app::DetailState;
 
 pub fn render(node: &Node, state: &DetailState, frame: &mut Frame, area: Rect) {
@@ -21,7 +21,7 @@ pub fn render(node: &Node, state: &DetailState, frame: &mut Frame, area: Rect) {
         Span::styled("Status:  ", Style::default().fg(Color::DarkGray)),
         Span::styled(
             format!("{:?}", node.status),
-            Style::default().fg(Color::Green),
+            Style::default().fg(status_color(&node.status)),
         ),
     ]));
     lines.push(Line::from(vec![
@@ -108,4 +108,13 @@ pub fn render(node: &Node, state: &DetailState, frame: &mut Frame, area: Rect) {
         area,
         &mut scrollbar_state,
     );
+}
+
+fn status_color(status: &NodeStatus) -> Color {
+    match status {
+        NodeStatus::Active => Color::Green,
+        NodeStatus::Dirty => Color::Yellow,
+        NodeStatus::Stale => Color::Yellow,
+        NodeStatus::Deprecated => Color::Red,
+    }
 }

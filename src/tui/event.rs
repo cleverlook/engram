@@ -22,10 +22,10 @@ impl EventHandler {
         thread::spawn(move || {
             loop {
                 if event::poll(tick_rate).unwrap_or(false) {
-                    if let Ok(CrosstermEvent::Key(key)) = event::read() {
-                        if tx.send(Event::Key(key)).is_err() {
-                            break;
-                        }
+                    if let Ok(CrosstermEvent::Key(key)) = event::read()
+                        && tx.send(Event::Key(key)).is_err()
+                    {
+                        break;
                     }
                 } else if tx.send(Event::Tick).is_err() {
                     break;

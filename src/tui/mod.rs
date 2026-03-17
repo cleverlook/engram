@@ -1,5 +1,5 @@
 mod app;
-pub mod event;
+mod event;
 mod views;
 
 use std::io;
@@ -32,10 +32,22 @@ pub fn run(cwd: &Path) -> anyhow::Result<()> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let mut app = App::new(nodes, engram_dir);
+    // Run the main loop, then always restore terminal — even on error
+    let result = run_loop(&mut terminal, App::new(nodes, engram_dir));
+
+    disable_raw_mode()?;
+    execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
+    terminal.show_cursor()?;
+
+    result
+}
+
+fn run_loop(
+    terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
+    mut app: App,
+) -> anyhow::Result<()> {
     let events = EventHandler::new(Duration::from_millis(250));
 
-    // Main loop
     while app.running {
         terminal.draw(|frame| render(&app, frame))?;
 
@@ -46,11 +58,6 @@ pub fn run(cwd: &Path) -> anyhow::Result<()> {
             _ => {}
         }
     }
-
-    // Restore terminal
-    disable_raw_mode()?;
-    execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
-    terminal.show_cursor()?;
 
     Ok(())
 }
@@ -67,9 +74,8 @@ fn render(app: &App, frame: &mut Frame) {
     match app.view {
         View::NodeList => views::node_list::render(app, frame, chunks[0]),
         View::NodeDetail => {
-            if let Some(node) = app.selected_node() {
-                let node = node.clone();
-                views::node_detail::render(&node, &app.detail_state, frame, chunks[0]);
+            if let Some(node) = app.nodes.get(app.selected_index) {
+                views::node_detail::render(node, &app.detail_state, frame, chunks[0]);
             }
         }
         View::Search => views::search::render(&app.search_state, &app.nodes, frame, chunks[0]),
