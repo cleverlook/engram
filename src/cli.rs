@@ -69,6 +69,13 @@ pub enum Command {
         #[arg(value_enum)]
         shell: clap_complete::Shell,
     },
+
+    /// Generate all shell completions to a directory (used by packaging)
+    #[command(hide = true)]
+    GenerateCompletions {
+        /// Output directory
+        outdir: String,
+    },
 }
 
 #[derive(Subcommand)]

@@ -19,3 +19,7 @@ install-path = "CARGO_HOME"
 publish-jobs = ["homebrew"]
 # Whether to install an updater program
 install-updater = true
+
+[[dist.extra-artifacts]]
+artifacts = ["target/completions/engram.bash", "target/completions/_engram", "target/completions/engram.fish", "target/completions/_engram.ps1"]
+build = ["cargo", "run", "--release", "--", "generate-completions", "target/completions"]

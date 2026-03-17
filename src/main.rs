@@ -64,5 +64,20 @@ fn main() -> anyhow::Result<()> {
             generate(shell, &mut Cli::command(), "engram", &mut std::io::stdout());
             Ok(())
         }
+        Command::GenerateCompletions { outdir } => {
+            let outdir = std::path::PathBuf::from(&outdir);
+            std::fs::create_dir_all(&outdir)?;
+            let mut cmd = Cli::command();
+            for shell in [
+                clap_complete::Shell::Bash,
+                clap_complete::Shell::Zsh,
+                clap_complete::Shell::Fish,
+                clap_complete::Shell::PowerShell,
+            ] {
+                clap_complete::generate_to(shell, &mut cmd, "engram", &outdir)?;
+            }
+            println!("Generated completions in {}", outdir.display());
+            Ok(())
+        }
     }
 }
