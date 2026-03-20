@@ -319,11 +319,6 @@ jobs:
             # We avoid reformatting user-provided data such as the app description and homepage.
             brew style --except-cops FormulaAudit/Homepage,FormulaAudit/Desc,FormulaAuditStrict --fix "Formula/${filename}" || true
 
-            # Add shell completions to formula
-            if ! grep -q 'generate_completions_from_executable' "Formula/${filename}"; then
-              sed -i 's/install_binary_aliases!/install_binary_aliases!\n\n    generate_completions_from_executable(bin\/"engram", "completion")/' "Formula/${filename}"
-            fi
-
             git add "Formula/${filename}"
             git commit -m "${name} ${version}"
           done
