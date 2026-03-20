@@ -1,0 +1,7 @@
+id: arch:fts5_search
+content: |
+  Search uses SQLite FTS5 full-text index as a derived cache from YAML.
+weight: 70
+status: active
+created: 2026-03-20T17:41:43.021005Z
+touched: 2026-03-20T17:41:43.021005Z

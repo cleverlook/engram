@@ -1,0 +1,7 @@
+id: arch:data_lake
+content: |
+  Data lake manages file artifacts linked to nodes in .engram/data_lake/.
+weight: 60
+status: active
+created: 2026-03-20T17:41:49.707250Z
+touched: 2026-03-20T17:41:49.707250Z

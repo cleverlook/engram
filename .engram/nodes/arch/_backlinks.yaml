@@ -2,25 +2,33 @@ namespace: arch
 backlinks:
 - node: arch:module_structure
   incoming:
-  - from: arch:data_flow
-    type: related
-    weight: 70
   - from: arch:namespace_mapping
     type: implements
     weight: 60
-- node: arch:data_flow
-  incoming:
-  - from: arch:traversal
-    type: uses
-    weight: 60
-  - from: arch:node_lifecycle
+  - from: arch:data_flow
     type: related
-    weight: 50
-  - from: arch:cli_modes
+    weight: 70
+  - from: arch:agent_interfaces
     type: related
-    weight: 50
+    weight: 40
 - node: arch:traversal
   incoming:
   - from: arch:node_lifecycle
     type: related
     weight: 50
+- node: arch:data_flow
+  incoming:
+  - from: arch:node_lifecycle
+    type: related
+    weight: 50
+  - from: arch:traversal
+    type: uses
+    weight: 60
+  - from: arch:cli_modes
+    type: related
+    weight: 50
+- node: arch:cli_modes
+  incoming:
+  - from: arch:agent_interfaces
+    type: related
+    weight: 70

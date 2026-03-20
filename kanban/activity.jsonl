@@ -59,3 +59,16 @@
 {"timestamp":"2026-03-17T14:22:20.145873+01:00","action":"move","task_id":22,"detail":"backlog -\u003e done"}
 {"timestamp":"2026-03-17T17:43:37.802862+01:00","action":"create","task_id":23,"detail":"TUI: Graph navigation - interactive edge traversal with history stack"}
 {"timestamp":"2026-03-17T17:43:40.23543+01:00","action":"create","task_id":24,"detail":"TUI: In-app node editing (create/edit/deprecate/add edges)"}
+{"timestamp":"2026-03-20T18:58:33.092114+01:00","action":"create","task_id":25,"detail":"Fix: multiline -c flag breaks YAML template"}
+{"timestamp":"2026-03-20T18:58:38.620405+01:00","action":"create","task_id":26,"detail":"Fix: stdin pipe create should auto-generate timestamps"}
+{"timestamp":"2026-03-20T18:58:43.454056+01:00","action":"create","task_id":27,"detail":"Fix: stdin pipe update should merge, not overwrite"}
+{"timestamp":"2026-03-20T18:58:49.791938+01:00","action":"create","task_id":28,"detail":"Add --add-edge and --add-source-file flags to create and update"}
+{"timestamp":"2026-03-20T18:58:54.644282+01:00","action":"create","task_id":29,"detail":"Fix SKILL.md: stdin examples and document working patterns"}
+{"timestamp":"2026-03-20T18:58:59.103479+01:00","action":"create","task_id":30,"detail":"Improve error messages for stdin YAML parsing"}
+{"timestamp":"2026-03-20T18:59:04.623192+01:00","action":"edit","task_id":29,"detail":"Fix SKILL.md: stdin examples and document working patterns"}
+{"timestamp":"2026-03-20T19:06:56.991077+01:00","action":"delete","task_id":26,"detail":"Fix: stdin pipe create should auto-generate timestamps"}
+{"timestamp":"2026-03-20T19:06:57.006696+01:00","action":"delete","task_id":27,"detail":"Fix: stdin pipe update should merge, not overwrite"}
+{"timestamp":"2026-03-20T19:07:09.127641+01:00","action":"create","task_id":31,"detail":"Stdin partial YAML: merge on source for create and update"}
+{"timestamp":"2026-03-20T19:07:14.373408+01:00","action":"edit","task_id":29,"detail":"Fix SKILL.md: stdin examples and document working patterns"}
+{"timestamp":"2026-03-20T19:07:14.387765+01:00","action":"edit","task_id":25,"detail":"Fix: multiline -c flag breaks YAML template"}
+{"timestamp":"2026-03-20T19:08:54.801277+01:00","action":"edit","task_id":29,"detail":"Fix SKILL.md: stdin examples and document working patterns"}
