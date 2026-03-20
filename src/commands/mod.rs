@@ -1,5 +1,6 @@
 pub mod backlinks;
 pub mod check;
+pub mod completion;
 pub mod init;
 pub mod lake;
 pub mod node;

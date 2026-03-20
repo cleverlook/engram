@@ -2,6 +2,14 @@ use console::style;
 
 use crate::models::node::{Node, NodeStatus};
 
+pub fn print_success(msg: &str) {
+    println!("{} {}", style("✓").green().bold(), msg);
+}
+
+pub fn print_info(msg: &str) {
+    println!("{} {}", style("ℹ").cyan(), msg);
+}
+
 pub fn print_node_header(node: &Node) {
     let status_styled = match node.status {
         NodeStatus::Active => style("active").green(),

@@ -68,13 +68,10 @@ pub enum Command {
         /// Shell to generate completions for
         #[arg(value_enum)]
         shell: clap_complete::Shell,
-    },
 
-    /// Generate all shell completions to a directory (used by packaging)
-    #[command(hide = true)]
-    GenerateCompletions {
-        /// Output directory
-        outdir: String,
+        /// Install to standard shell completion directory
+        #[arg(long)]
+        install: bool,
     },
 
     /// Launch interactive TUI for browsing the node graph

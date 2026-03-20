@@ -61,23 +61,12 @@ fn main() -> anyhow::Result<()> {
             LakeAction::List => commands::lake::list(&cwd),
             LakeAction::Remove { file } => commands::lake::remove(&cwd, &file),
         },
-        Command::Completion { shell } => {
-            generate(shell, &mut Cli::command(), "engram", &mut std::io::stdout());
-            Ok(())
-        }
-        Command::GenerateCompletions { outdir } => {
-            let outdir = std::path::PathBuf::from(&outdir);
-            std::fs::create_dir_all(&outdir)?;
-            let mut cmd = Cli::command();
-            for shell in [
-                clap_complete::Shell::Bash,
-                clap_complete::Shell::Zsh,
-                clap_complete::Shell::Fish,
-                clap_complete::Shell::PowerShell,
-            ] {
-                clap_complete::generate_to(shell, &mut cmd, "engram", &outdir)?;
+        Command::Completion { shell, install } => {
+            if install {
+                commands::completion::install(shell)?;
+            } else {
+                generate(shell, &mut Cli::command(), "engram", &mut std::io::stdout());
             }
-            println!("Generated completions in {}", outdir.display());
             Ok(())
         }
         Command::Tui => tui::run(&cwd),
