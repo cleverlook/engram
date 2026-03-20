@@ -123,7 +123,11 @@ pub fn create(path: &Path, args: CreateArgs) -> Result<()> {
 
     let node_path = storage::node_path(&engram_dir, &node.id);
     if node_path.exists() {
-        bail!("Node '{}' already exists", node.id);
+        let existing = storage::load_node(&engram_dir, &node.id)?;
+        if existing.status != NodeStatus::Deprecated {
+            bail!("Node '{}' already exists", node.id);
+        }
+        // Deprecated node — allow re-creation by overwriting
     }
 
     storage::save_node(&engram_dir, &node)?;

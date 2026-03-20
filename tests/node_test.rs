@@ -206,3 +206,38 @@ fn test_create_multiline_c_flag() {
     assert!(stdout.contains("Line two"));
     assert!(stdout.contains("Line three"));
 }
+
+#[test]
+fn test_create_over_deprecated_node() {
+    let dir = TempDir::new().unwrap();
+    helpers::setup_engram(dir.path());
+    helpers::create_node(dir.path(), TEST_NODE_REDIS);
+
+    // Deprecate
+    let output = helpers::run_engram(dir.path(), &["node", "deprecate", "redis:session_store"]);
+    assert!(output.status.success());
+
+    // Re-create with same id should succeed
+    let output = helpers::run_engram(
+        dir.path(),
+        &[
+            "node",
+            "create",
+            "redis:session_store",
+            "-c",
+            "Recreated after deprecation",
+            "-w",
+            "60",
+        ],
+    );
+    assert!(
+        output.status.success(),
+        "create over deprecated should work: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let output = helpers::run_engram(dir.path(), &["node", "get", "redis:session_store"]);
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("Recreated after deprecation"));
+    assert!(stdout.contains("active"));
+}
