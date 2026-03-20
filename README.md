@@ -8,7 +8,7 @@ Stores knowledge as a weighted node graph in YAML files inside `.engram/` — hu
 
 ```bash
 # Homebrew (macOS/Linux)
-brew install cleverlook/engram
+brew install cleverlook/tap/engram
 
 # Shell installer
 curl --proto '=https' --tlsv1.2 -LsSf https://github.com/cleverlook/engram/releases/latest/download/engram-installer.sh | sh
