@@ -90,3 +90,31 @@ Graph traversal uses weighted BFS (`BinaryHeap`) with a token budget (default 40
 ### Node Lifecycle
 
 Nodes have status: `active` → `dirty` (source files changed) → `stale` (30+ days untouched) → `deprecated`. Weight decay runs during `engram status` (-1 after 30 days, -5 after 90 days untouched).
+
+## Working with this project
+
+### Git conventions
+
+- Do not add `Co-Authored-By` to commit messages.
+- Do not amend commits unless explicitly asked.
+- Do not push unless explicitly asked.
+- Commit messages: short, imperative, `type(scope): description` format.
+
+### Using engram
+
+Engram is its own user. Use the `engram` skill and the installed `engram` binary (not `cargo run`) to interact with memory. Read the skill before using commands.
+
+Before starting work: `engram search <topic>` to load context.
+After finishing work: save architectural knowledge to `.engram/nodes/` — not workflow preferences.
+
+Engram nodes should contain **project knowledge**: architecture decisions, how systems work, non-obvious behaviors. Do NOT store personal feedback, workflow preferences, or process notes as engram nodes — those belong in CLAUDE.md.
+
+### Distribution
+
+- **cargo-dist** handles releases via `.github/workflows/release.yml`. Do not manually edit the generated workflow — `dist init` will overwrite changes.
+- **Homebrew**: `brew install cleverlook/tap/engram`. Tap repo is `cleverlook/homebrew-tap`.
+- Shell completions are not auto-installed via Homebrew (cargo-dist limitation). Users run `engram completion install <shell>` post-install.
+
+### Manual testing
+
+Never test `engram node create/update/deprecate` in the project's own `.engram/`. Use integration tests with `TempDir` or a separate temp directory.
