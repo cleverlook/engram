@@ -72,3 +72,13 @@
 {"timestamp":"2026-03-20T19:07:14.373408+01:00","action":"edit","task_id":29,"detail":"Fix SKILL.md: stdin examples and document working patterns"}
 {"timestamp":"2026-03-20T19:07:14.387765+01:00","action":"edit","task_id":25,"detail":"Fix: multiline -c flag breaks YAML template"}
 {"timestamp":"2026-03-20T19:08:54.801277+01:00","action":"edit","task_id":29,"detail":"Fix SKILL.md: stdin examples and document working patterns"}
+{"timestamp":"2026-03-20T19:15:35.62527+01:00","action":"move","task_id":25,"detail":"backlog -\u003e in-progress"}
+{"timestamp":"2026-03-20T19:15:35.626604+01:00","action":"move","task_id":31,"detail":"backlog -\u003e in-progress"}
+{"timestamp":"2026-03-20T19:21:35.580997+01:00","action":"move","task_id":25,"detail":"in-progress -\u003e done"}
+{"timestamp":"2026-03-20T19:21:35.581498+01:00","action":"move","task_id":31,"detail":"in-progress -\u003e done"}
+{"timestamp":"2026-03-20T19:21:42.913067+01:00","action":"move","task_id":28,"detail":"backlog -\u003e in-progress"}
+{"timestamp":"2026-03-20T19:25:11.023675+01:00","action":"move","task_id":28,"detail":"in-progress -\u003e done"}
+{"timestamp":"2026-03-20T19:25:11.038605+01:00","action":"move","task_id":30,"detail":"backlog -\u003e in-progress"}
+{"timestamp":"2026-03-20T19:25:54.961157+01:00","action":"move","task_id":30,"detail":"in-progress -\u003e done"}
+{"timestamp":"2026-03-20T19:25:54.976997+01:00","action":"move","task_id":29,"detail":"backlog -\u003e in-progress"}
+{"timestamp":"2026-03-20T19:27:51.655387+01:00","action":"move","task_id":29,"detail":"in-progress -\u003e done"}

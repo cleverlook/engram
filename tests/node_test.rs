@@ -23,6 +23,14 @@ touched: 2024-03-10T00:00:00Z
 edges: []
 "#;
 
+// Partial YAML — no timestamps, no status
+const TEST_NODE_PARTIAL: &str = r#"id: test:partial
+content: |
+  Multiline content here.
+  Second line of content.
+weight: 65
+"#;
+
 #[test]
 fn test_node_create_and_get() {
     let dir = TempDir::new().unwrap();
@@ -123,4 +131,78 @@ fn test_backlinks_created_on_node_create() {
     let content = std::fs::read_to_string(&bl_path).unwrap();
     assert!(content.contains("auth:oauth:google"));
     assert!(content.contains("uses"));
+}
+
+#[test]
+fn test_stdin_create_partial_yaml() {
+    let dir = TempDir::new().unwrap();
+    helpers::setup_engram(dir.path());
+    helpers::create_node(dir.path(), TEST_NODE_PARTIAL);
+
+    // Should exist with auto-generated timestamps
+    let output = helpers::run_engram(dir.path(), &["node", "get", "test:partial"]);
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("Multiline content here."));
+    assert!(stdout.contains("Second line of content."));
+    assert!(stdout.contains("w:65"));
+}
+
+#[test]
+fn test_stdin_update_preserves_edges() {
+    let dir = TempDir::new().unwrap();
+    helpers::setup_engram(dir.path());
+    helpers::create_node(dir.path(), TEST_NODE_REDIS);
+    helpers::create_node(dir.path(), TEST_NODE);
+
+    // Update only content via stdin — edges should survive
+    helpers::update_node_stdin(
+        dir.path(),
+        "auth:oauth:google",
+        "content: Updated via partial YAML.\n",
+    );
+
+    // Verify content changed
+    let output = helpers::run_engram(dir.path(), &["node", "get", "auth:oauth:google"]);
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("Updated via partial YAML."));
+
+    // Verify edges preserved in YAML file
+    let yaml =
+        std::fs::read_to_string(dir.path().join(".engram/nodes/auth/oauth/google.yaml")).unwrap();
+    assert!(
+        yaml.contains("redis:session_store"),
+        "edges should be preserved"
+    );
+    assert!(yaml.contains("uses"), "edge type should be preserved");
+}
+
+#[test]
+fn test_create_multiline_c_flag() {
+    let dir = TempDir::new().unwrap();
+    helpers::setup_engram(dir.path());
+
+    let output = helpers::run_engram(
+        dir.path(),
+        &[
+            "node",
+            "create",
+            "test:multiline",
+            "-c",
+            "Line one\nLine two\nLine three",
+            "-w",
+            "50",
+        ],
+    );
+    assert!(
+        output.status.success(),
+        "multiline -c should work: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let output = helpers::run_engram(dir.path(), &["node", "get", "test:multiline"]);
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("Line one"));
+    assert!(stdout.contains("Line two"));
+    assert!(stdout.contains("Line three"));
 }

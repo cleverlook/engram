@@ -1,14 +1,18 @@
 ---
 id: 31
 title: 'Stdin partial YAML: merge on source for create and update'
-status: backlog
+status: done
 priority: critical
 created: 2026-03-20T19:07:09.127332+01:00
-updated: 2026-03-20T19:07:09.127332+01:00
+updated: 2026-03-20T19:21:35.58141+01:00
+started: 2026-03-20T19:15:35.626468+01:00
+completed: 2026-03-20T19:21:35.58141+01:00
 tags:
     - bug
     - cli
     - agent-ux
+claimed_by: kolkhoz-infand
+claimed_at: 2026-03-20T19:21:35.58141+01:00
 class: standard
 ---
 

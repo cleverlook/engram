@@ -1,14 +1,18 @@
 ---
 id: 30
 title: Improve error messages for stdin YAML parsing
-status: backlog
+status: done
 priority: medium
 created: 2026-03-20T18:58:59.103031+01:00
-updated: 2026-03-20T18:58:59.103031+01:00
+updated: 2026-03-20T19:25:54.960937+01:00
+started: 2026-03-20T19:25:11.038429+01:00
+completed: 2026-03-20T19:25:54.960936+01:00
 tags:
     - enhancement
     - cli
     - agent-ux
+claimed_by: kolkhoz-infand
+claimed_at: 2026-03-20T19:25:54.960937+01:00
 class: standard
 ---
 

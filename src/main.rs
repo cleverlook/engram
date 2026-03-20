@@ -10,6 +10,7 @@ mod tui;
 use clap::{CommandFactory, Parser};
 use clap_complete::generate;
 use cli::{Cli, Command, LakeAction, NodeAction};
+use commands::node::{CreateArgs, UpdateArgs};
 use std::env;
 
 fn main() -> anyhow::Result<()> {
@@ -25,23 +26,46 @@ fn main() -> anyhow::Result<()> {
                 content,
                 weight,
                 data_lake,
+                add_edge,
+                add_source_file,
                 edit,
-            } => commands::node::create(&cwd, id, content, weight, data_lake, edit),
+            } => commands::node::create(
+                &cwd,
+                CreateArgs {
+                    id,
+                    content,
+                    weight,
+                    data_lake,
+                    add_edge,
+                    add_source_file,
+                    edit,
+                },
+            ),
             NodeAction::Update {
                 id,
                 content,
                 weight,
                 add_data_lake,
                 remove_data_lake,
+                add_edge,
+                remove_edge,
+                add_source_file,
+                remove_source_file,
                 edit,
             } => commands::node::update(
                 &cwd,
-                &id,
-                content,
-                weight,
-                add_data_lake,
-                remove_data_lake,
-                edit,
+                UpdateArgs {
+                    id,
+                    content,
+                    weight,
+                    add_data_lake,
+                    remove_data_lake,
+                    add_edge,
+                    remove_edge,
+                    add_source_file,
+                    remove_source_file,
+                    edit,
+                },
             ),
             NodeAction::Deprecate { id } => commands::node::deprecate(&cwd, &id),
         },

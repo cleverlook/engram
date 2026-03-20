@@ -1,14 +1,18 @@
 ---
 id: 25
 title: 'Fix: multiline -c flag breaks YAML template'
-status: backlog
+status: done
 priority: critical
 created: 2026-03-20T18:58:33.091695+01:00
-updated: 2026-03-20T19:07:14.387561+01:00
+updated: 2026-03-20T19:21:35.5808+01:00
+started: 2026-03-20T19:15:35.625018+01:00
+completed: 2026-03-20T19:21:35.580799+01:00
 tags:
     - bug
     - cli
     - agent-ux
+claimed_by: kolkhoz-infand
+claimed_at: 2026-03-20T19:21:35.5808+01:00
 class: standard
 ---
 

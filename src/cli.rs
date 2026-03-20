@@ -102,6 +102,14 @@ pub enum NodeAction {
         #[arg(short, long)]
         data_lake: Vec<String>,
 
+        /// Add edge (repeatable, format: "target:type:weight" e.g. "auth:session:uses:50")
+        #[arg(long)]
+        add_edge: Vec<String>,
+
+        /// Add source file (repeatable)
+        #[arg(long)]
+        add_source_file: Vec<String>,
+
         /// Open $EDITOR to create node
         #[arg(short, long)]
         edit: bool,
@@ -126,6 +134,22 @@ pub enum NodeAction {
         /// Remove data lake files (repeatable)
         #[arg(long)]
         remove_data_lake: Vec<String>,
+
+        /// Add edge (repeatable, format: "target:type:weight" e.g. "auth:session:uses:50")
+        #[arg(long)]
+        add_edge: Vec<String>,
+
+        /// Remove edge by target node id (repeatable)
+        #[arg(long)]
+        remove_edge: Vec<String>,
+
+        /// Add source file (repeatable)
+        #[arg(long)]
+        add_source_file: Vec<String>,
+
+        /// Remove source file (repeatable)
+        #[arg(long)]
+        remove_source_file: Vec<String>,
 
         /// Open $EDITOR with current node content
         #[arg(short, long)]

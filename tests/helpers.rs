@@ -43,6 +43,27 @@ pub fn create_node(dir: &std::path::Path, yaml: &str) {
     );
 }
 
+pub fn update_node_stdin(dir: &std::path::Path, id: &str, yaml: &str) {
+    let output = Command::new(engram_bin())
+        .args(["node", "update", id])
+        .current_dir(dir)
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .and_then(|mut child| {
+            use std::io::Write;
+            child.stdin.take().unwrap().write_all(yaml.as_bytes())?;
+            child.wait_with_output()
+        })
+        .expect("failed to run engram node update");
+    assert!(
+        output.status.success(),
+        "node update failed: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+}
+
 pub fn run_engram(dir: &std::path::Path, args: &[&str]) -> std::process::Output {
     Command::new(engram_bin())
         .args(args)

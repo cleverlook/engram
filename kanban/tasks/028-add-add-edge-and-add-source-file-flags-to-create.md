@@ -1,14 +1,18 @@
 ---
 id: 28
 title: Add --add-edge and --add-source-file flags to create and update
-status: backlog
+status: done
 priority: medium
 created: 2026-03-20T18:58:49.791556+01:00
-updated: 2026-03-20T18:58:49.791556+01:00
+updated: 2026-03-20T19:25:11.02345+01:00
+started: 2026-03-20T19:21:42.91283+01:00
+completed: 2026-03-20T19:25:11.023449+01:00
 tags:
     - enhancement
     - cli
     - agent-ux
+claimed_by: kolkhoz-infand
+claimed_at: 2026-03-20T19:25:11.02345+01:00
 class: standard
 ---
 

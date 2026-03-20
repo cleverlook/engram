@@ -1,24 +1,22 @@
 id: arch:agent_interfaces
-content: |
+content: |-
   Engram CLI provides three interfaces for AI agents:
-  1. Flags — quick path for simple ops: engram node create x:y -c "content" -w 70
-  2. Stdin pipe — partial YAML for multiline content and complex metadata
-  3. Direct YAML edit + engram rebuild-index — full control, bulk operations
-  Each interface has trade-offs. Flags can't do multiline or edges (yet).
-  Stdin requires partial YAML support (in progress). Direct edit always works.
-  SKILL.md must accurately document all three as the source of truth for agents.
+  1. Flags — quick path: engram node create x:y -c "content" -w 70 --add-edge "a:b:related:50" --add-source-file src/main.rs
+  2. Stdin pipe — partial YAML for multiline/complex nodes. Only provide fields you want to set (create) or change (update). Defaults/existing fields preserved via serde_yaml::Value merge.
+  3. Direct YAML edit + engram rebuild-index — full control, bulk operations.
+  SKILL.md is the source of truth for agents. Every example in it must work as-is.
 weight: 75
 status: active
 source_files:
-  - src/commands/node.rs
-  - src/cli.rs
-  - .claude/skills/engram/SKILL.md
-edges:
-  - to: arch:cli_modes
-    type: related
-    weight: 70
-  - to: arch:module_structure
-    type: related
-    weight: 40
+- src/commands/node.rs
+- src/cli.rs
+- .claude/skills/engram/SKILL.md
 created: 2026-03-20T18:00:00Z
-touched: 2026-03-20T18:00:00Z
+touched: 2026-03-20T18:38:16.896648Z
+edges:
+- to: arch:cli_modes
+  type: related
+  weight: 70
+- to: arch:module_structure
+  type: related
+  weight: 40
