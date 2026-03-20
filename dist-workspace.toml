@@ -19,3 +19,5 @@ install-path = "CARGO_HOME"
 publish-jobs = ["homebrew"]
 # Whether to install an updater program
 install-updater = true
+# Allow CI workflow to differ from dist-generated (we patch it for shell completions)
+allow-dirty = ["ci"]
