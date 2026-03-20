@@ -8,7 +8,7 @@ Stores knowledge as a weighted node graph in YAML files inside `.engram/` — hu
 
 ```bash
 # Homebrew (macOS/Linux)
-brew install cleverlook/tap/engram
+brew install cleverlook/engram
 
 # Shell installer
 curl --proto '=https' --tlsv1.2 -LsSf https://github.com/cleverlook/engram/releases/latest/download/engram-installer.sh | sh
@@ -59,7 +59,7 @@ engram rebuild-index                   Rebuild indexes, backlinks, SQLite
 engram lake add <file> [-l <node>]     Add file to data lake, optionally link to node
 engram lake list                       List data lake files
 engram lake remove <file>              Remove file from data lake
-engram completion <shell>              Generate shell completions (zsh/bash/fish)
+engram completion <shell> [--install]  Generate/install shell completions (zsh/bash/fish)
 ```
 
 ## How it works
