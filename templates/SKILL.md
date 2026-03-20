@@ -19,15 +19,96 @@ Memory is faster than re-reading code. Use it before, during, and after work.
 - **Finished work?** → `engram node create` or `engram node update` to save what you learned
 - **Something feels wrong?** → `engram status` + `engram check` to find stale/broken nodes
 
-## Commands reference
+## Three interfaces for writing nodes
+
+Choose the right interface for the job:
+
+### 1. Flags — quick, single-line content
+
+Best for simple nodes or quick updates. Supports multiline content (newlines in `-c` are handled correctly).
+
+```bash
+# Create with content, weight, edges, and source files
+engram node create <id> -c "description" -w 60
+engram node create <id> -c "description" -w 60 \
+  --add-edge "other:node:related:50" \
+  --add-source-file src/main.rs
+
+# Update specific fields (merges into existing — preserves everything not mentioned)
+engram node update <id> -c "new content" -w 75
+engram node update <id> --add-edge "new:target:uses:60" --remove-edge "old:target"
+engram node update <id> --add-source-file src/new.rs --remove-source-file src/old.rs
+```
+
+| Flag                  | Short | Create | Update | Description                         |
+|-----------------------|-------|--------|--------|-------------------------------------|
+| `--content`           | `-c`  | yes    | yes    | Node content text                   |
+| `--weight`            | `-w`  | yes    | yes    | Importance 0-100 (default: 50)      |
+| `--data-lake`         | `-d`  | yes    | —      | Link data lake file (repeatable)    |
+| `--add-data-lake`     |       | —      | yes    | Add data lake file (repeatable)     |
+| `--remove-data-lake`  |       | —      | yes    | Remove data lake file (repeatable)  |
+| `--add-edge`          |       | yes    | yes    | Add edge: `"target:type:weight"`    |
+| `--remove-edge`       |       | —      | yes    | Remove edge by target id            |
+| `--add-source-file`   |       | yes    | yes    | Add source file path (repeatable)   |
+| `--remove-source-file`|       | —      | yes    | Remove source file (repeatable)     |
+| `--edit`              | `-e`  | yes    | yes    | Open $EDITOR                        |
+
+Edge format: `"target_id:edge_type:weight"` — e.g. `"auth:session:uses:50"`.
+Valid edge types: `uses`, `depends_on`, `implements`, `rationale`, `related`.
+
+### 2. Stdin pipe — partial YAML for complex nodes
+
+Best for multiline content, multiple edges, or batch operations. **Only provide the fields you want to set** — everything else gets sensible defaults (create) or is preserved from the existing node (update).
+
+**Create — only `id` is required:**
+```bash
+cat <<'EOF' | engram node create
+id: auth:oauth:google
+content: |
+  Google OAuth integration using PKCE flow.
+  Tokens stored in encrypted session cookie.
+weight: 70
+edges:
+  - to: auth:session
+    type: uses
+    weight: 50
+source_files:
+  - src/auth/oauth.rs
+EOF
+```
+
+Defaults when omitted: `content: ""`, `weight: 50`, `status: active`, timestamps auto-generated.
+
+**Update — pipe only fields to change:**
+```bash
+cat <<'EOF' | engram node update auth:oauth:google
+content: |
+  Updated: now uses PKCE v2 flow.
+  Tokens stored in encrypted httpOnly cookie.
+weight: 80
+EOF
+```
+
+Existing edges, source_files, and other fields are preserved.
+
+### 3. Direct YAML edit + rebuild-index — full control
+
+Best for bulk editing, reorganizing nodes, or when the CLI is insufficient.
+
+```bash
+# Edit YAML files directly
+$EDITOR .engram/nodes/auth/oauth/google.yaml
+
+# Rebuild all indexes and search cache from YAML source of truth
+engram rebuild-index
+```
+
+Node id maps to filesystem: `auth:oauth:google` → `.engram/nodes/auth/oauth/google.yaml`
+
+## Read commands
 
 ### search — Full-text search across all nodes
 
-```
-engram search <query>
-```
-
-Example:
 ```bash
 engram search "authentication flow"
 engram search "error handling"
@@ -35,8 +116,10 @@ engram search "error handling"
 
 ### traverse — Walk the graph from a node
 
-```
-engram traverse <node:id> [--depth N] [--min-weight N] [--budget N]
+```bash
+engram traverse auth:oauth              # explore auth namespace
+engram traverse core:storage --depth 3  # shallow traversal
+engram traverse api:endpoints --min-weight 30 --budget 8000  # high-signal deep dive
 ```
 
 | Flag           | Default | Description                        |
@@ -45,111 +128,29 @@ engram traverse <node:id> [--depth N] [--min-weight N] [--budget N]
 | `--min-weight` | 0       | Minimum edge weight to follow      |
 | `--budget`     | 4000    | Token budget (stops when exceeded) |
 
-Example:
-```bash
-engram traverse auth:oauth              # explore auth namespace
-engram traverse core:storage --depth 3  # shallow traversal
-engram traverse api:endpoints --min-weight 30 --budget 8000  # high-signal deep dive
-```
-
 ### node get — Read a specific node
 
-```
-engram node get <node:id>
-```
-
-Example:
 ```bash
 engram node get auth:oauth:google
 ```
 
-### node create — Save new knowledge
-
-Four input modes:
-
-**1. Flags (best for agents — non-interactive):**
-```bash
-engram node create <id> --content "description" --weight 60
-engram node create <id> -c "description" -w 60
-engram node create <id> -c "description" -w 60 --data-lake diagram.png
-```
-
-**2. Stdin pipe (for structured YAML):**
-```bash
-cat <<'EOF' | engram node create
-id: auth:oauth:google
-content: |
-  Google OAuth integration using PKCE flow.
-  Tokens stored in encrypted session cookie.
-weight: 70
-status: active
-edges:
-  - to: auth:session
-    type: uses
-    weight: 50
-EOF
-```
-
-**3. Editor (`--edit` / `-e`):**
-```bash
-engram node create --edit
-engram node create auth:oauth:google --edit  # pre-fills id
-```
-
-**4. Interactive (auto-detected when TTY, no flags, no id):**
-```bash
-engram node create  # prompts for id, content, weight, edges
-```
-
-| Flag             | Short | Description                         |
-|------------------|-------|-------------------------------------|
-| `--content`      | `-c`  | Node content text                   |
-| `--weight`       | `-w`  | Importance 0-100 (default: 50)      |
-| `--data-lake`    | `-d`  | Link data lake file (repeatable)    |
-| `--edit`         | `-e`  | Open $EDITOR                        |
-
-### node update — Update existing node
-
-```
-engram node update <id> [--content "new text"] [--weight N]
-                        [--add-data-lake file] [--remove-data-lake file]
-                        [--edit]
-```
-
-Example:
-```bash
-engram node update auth:oauth:google --content "Updated: now uses PKCE v2" --weight 75
-engram node update auth:oauth:google --add-data-lake oauth-flow.png
-engram node update auth:oauth:google --edit  # edit in $EDITOR
-```
-
-Stdin pipe also works — pipe full node YAML to overwrite.
-
-### node deprecate — Mark a node as deprecated
-
-```
-engram node deprecate <id>
-```
-
-Example:
-```bash
-engram node deprecate auth:legacy:basic_auth
-```
-
 ### backlinks — See what points to a node
 
-```
-engram backlinks <id>
-```
-
-Example:
 ```bash
 engram backlinks auth:session  # which nodes reference auth:session?
 ```
 
+## Lifecycle commands
+
+### node deprecate — Mark a node as deprecated
+
+```bash
+engram node deprecate auth:legacy:basic_auth
+```
+
 ### status — Dirty/stale report + weight decay
 
-```
+```bash
 engram status
 ```
 
@@ -157,59 +158,52 @@ Shows nodes with changed source files (dirty), untouched >30 days (stale), and a
 
 ### check — Graph integrity validation
 
-```
+```bash
 engram check
 ```
 
 Reports broken edges, missing nodes, orphaned files.
 
+### rebuild-index — Rebuild all derived data
+
+```bash
+engram rebuild-index
+```
+
+Rebuilds `_index.yaml`, `_backlinks.yaml`, and SQLite FTS from YAML source of truth.
+
 ### lake — Data lake artifact management
 
-```
-engram lake add <file> [--link <node:id>]   # copy file into data lake
-engram lake list                             # list all lake files
-engram lake remove <filename>                # remove from lake
-```
-
-Example:
 ```bash
 engram lake add docs/architecture.png --link core:architecture
 engram lake list
 engram lake remove old-diagram.png
 ```
 
-### rebuild-index — Rebuild all derived data
-
-```
-engram rebuild-index
-```
-
-Rebuilds `_index.yaml`, `_backlinks.yaml`, and SQLite FTS from YAML source of truth.
-
 ### tui — Interactive terminal UI
 
-```
+```bash
 engram tui
 ```
-
-Browse and navigate the node graph interactively.
 
 ## Typical agent workflow
 
 ```bash
-# 1. Starting a task about authentication
+# 1. Starting a task — load context
 engram search "auth"
 engram traverse auth:oauth --depth 3
 
-# 2. Read returned nodes for context (faster than reading source)
+# 2. Read specific nodes
 engram node get auth:oauth:google
 
 # 3. Do the work...
 
-# 4. Save what you learned
-engram node create auth:oauth:pkce -c "PKCE flow implementation details..." -w 60
+# 4. Save what you learned (flags for simple, stdin for complex)
+engram node create auth:oauth:pkce -c "PKCE flow implementation details" -w 60 \
+  --add-edge "auth:oauth:google:implements:70" \
+  --add-source-file src/auth/pkce.rs
 
-# 5. Update existing node if content changed
+# 5. Update existing node
 engram node update auth:oauth:google -c "Updated after PKCE migration" -w 75
 ```
 

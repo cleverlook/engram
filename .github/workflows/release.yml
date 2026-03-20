@@ -304,23 +304,6 @@ jobs:
           merge-multiple: true
       # This is extra complex because you can make your Formula name not match your app name
       # so we need to find releases with a *.rb file, and publish with that filename.
-      - name: Patch formula with shell completions
-        run: |
-          for rb in Formula/*.rb; do
-            if grep -q 'install_binary_aliases' "$rb" && ! grep -q 'generate_completions_from_executable' "$rb"; then
-              python3 -c "
-          import sys
-          with open(sys.argv[1]) as f:
-              content = f.read()
-          content = content.replace(
-              '    install_binary_aliases!\n',
-              '    install_binary_aliases!\n\n    generate_completions_from_executable(bin/\"engram\", \"completion\")\n'
-          )
-          with open(sys.argv[1], 'w') as f:
-              f.write(content)
-          " "$rb"
-            fi
-          done
       - name: Commit formula files
         run: |
           git config --global user.name "${GITHUB_USER}"
@@ -335,6 +318,11 @@ jobs:
             brew update
             # We avoid reformatting user-provided data such as the app description and homepage.
             brew style --except-cops FormulaAudit/Homepage,FormulaAudit/Desc,FormulaAuditStrict --fix "Formula/${filename}" || true
+
+            # Add shell completions to formula
+            if ! grep -q 'generate_completions_from_executable' "Formula/${filename}"; then
+              sed -i 's/install_binary_aliases!/install_binary_aliases!\n\n    generate_completions_from_executable(bin\/"engram", "completion")/' "Formula/${filename}"
+            fi
 
             git add "Formula/${filename}"
             git commit -m "${name} ${version}"
