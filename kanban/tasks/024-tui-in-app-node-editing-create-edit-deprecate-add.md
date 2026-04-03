@@ -1,10 +1,12 @@
 ---
 id: 24
 title: 'TUI: In-app node editing (create/edit/deprecate/add edges)'
-status: backlog
+status: done
 priority: medium
 created: 2026-03-17T17:43:40.234663+01:00
-updated: 2026-03-17T17:43:40.234663+01:00
+updated: 2026-04-03T17:36:22.639312+02:00
+started: 2026-04-03T16:18:31.939174+02:00
+completed: 2026-04-03T17:36:22.639311+02:00
 tags:
     - tui
     - editing

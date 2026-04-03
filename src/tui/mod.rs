@@ -1,5 +1,6 @@
 mod app;
 mod event;
+mod mutations;
 mod views;
 
 use std::io;
@@ -13,8 +14,15 @@ use crossterm::terminal::{
 };
 use ratatui::prelude::*;
 
-use app::{App, View};
+use app::{App, EDGE_TYPES, Overlay, View};
 use event::{Event, EventHandler};
+
+enum TuiAction {
+    Create,
+    Edit,
+    Deprecate,
+    AddEdge,
+}
 
 pub fn run(cwd: &Path) -> anyhow::Result<()> {
     let engram_dir = crate::storage::find_engram_dir(cwd)?;
@@ -53,7 +61,9 @@ fn run_loop(
 
         match events.next()? {
             Event::Key(key) if key.kind == KeyEventKind::Press => {
-                handle_key(&mut app, key);
+                if let Some(action) = handle_key(&mut app, key) {
+                    process_action(&mut app, terminal, &events, action)?;
+                }
             }
             _ => {}
         }
@@ -81,39 +91,122 @@ fn render(app: &App, frame: &mut Frame) {
         View::Search => views::search::render(&app.search_state, &app.nodes, frame, chunks[0]),
     }
 
-    // Help bar
-    let help = match app.view {
-        View::NodeDetail => Line::from(vec![
-            Span::styled(" q", Style::default().fg(Color::Yellow).bold()),
-            Span::raw(" quit  "),
-            Span::styled("j/k", Style::default().fg(Color::Yellow).bold()),
-            Span::raw(" scroll  "),
-            Span::styled("Tab", Style::default().fg(Color::Yellow).bold()),
-            Span::raw(" select edge  "),
-            Span::styled("Enter", Style::default().fg(Color::Yellow).bold()),
-            Span::raw(" follow edge  "),
-            Span::styled("Bksp", Style::default().fg(Color::Yellow).bold()),
-            Span::raw(" back"),
-        ]),
-        _ => Line::from(vec![
-            Span::styled(" q", Style::default().fg(Color::Yellow).bold()),
-            Span::raw(" quit  "),
-            Span::styled("j/k", Style::default().fg(Color::Yellow).bold()),
-            Span::raw(" navigate  "),
-            Span::styled("Enter", Style::default().fg(Color::Yellow).bold()),
-            Span::raw(" detail  "),
-            Span::styled("/", Style::default().fg(Color::Yellow).bold()),
-            Span::raw(" search  "),
-            Span::styled("s", Style::default().fg(Color::Yellow).bold()),
-            Span::raw(" sort  "),
-            Span::styled("Esc", Style::default().fg(Color::Yellow).bold()),
-            Span::raw(" back"),
-        ]),
-    };
-    frame.render_widget(help, chunks[1]);
+    // Overlay
+    match &app.overlay {
+        Overlay::ConfirmDeprecate => {
+            if let Some(node) = app.selected_node() {
+                views::overlay::render_confirm_deprecate(&node.id, frame, chunks[0]);
+            }
+        }
+        Overlay::CreateForm => {
+            views::overlay::render_create_form(&app.create_form, frame, chunks[0]);
+        }
+        Overlay::AddEdgeForm => {
+            views::overlay::render_add_edge_form(&app.add_edge_form, frame, chunks[0]);
+        }
+        Overlay::None => {}
+    }
+
+    // Status message or help bar
+    if let Some((msg, is_error)) = &app.status_message {
+        let style = if *is_error {
+            Style::default().fg(Color::Red)
+        } else {
+            Style::default().fg(Color::Green)
+        };
+        frame.render_widget(
+            Line::from(Span::styled(format!(" {msg}"), style)),
+            chunks[1],
+        );
+    } else {
+        let help = match app.view {
+            View::NodeDetail => Line::from(vec![
+                Span::styled(" q", Style::default().fg(Color::Yellow).bold()),
+                Span::raw(" quit  "),
+                Span::styled("j/k", Style::default().fg(Color::Yellow).bold()),
+                Span::raw(" scroll  "),
+                Span::styled("Tab", Style::default().fg(Color::Yellow).bold()),
+                Span::raw(" edge  "),
+                Span::styled("Enter", Style::default().fg(Color::Yellow).bold()),
+                Span::raw(" follow  "),
+                Span::styled("e", Style::default().fg(Color::Yellow).bold()),
+                Span::raw(" edit  "),
+                Span::styled("d", Style::default().fg(Color::Yellow).bold()),
+                Span::raw(" deprecate  "),
+                Span::styled("a", Style::default().fg(Color::Yellow).bold()),
+                Span::raw(" add edge  "),
+                Span::styled("Bksp", Style::default().fg(Color::Yellow).bold()),
+                Span::raw(" back"),
+            ]),
+            _ => Line::from(vec![
+                Span::styled(" q", Style::default().fg(Color::Yellow).bold()),
+                Span::raw(" quit  "),
+                Span::styled("j/k", Style::default().fg(Color::Yellow).bold()),
+                Span::raw(" navigate  "),
+                Span::styled("Enter", Style::default().fg(Color::Yellow).bold()),
+                Span::raw(" detail  "),
+                Span::styled("/", Style::default().fg(Color::Yellow).bold()),
+                Span::raw(" search  "),
+                Span::styled("s", Style::default().fg(Color::Yellow).bold()),
+                Span::raw(" sort  "),
+                Span::styled("c", Style::default().fg(Color::Yellow).bold()),
+                Span::raw(" create  "),
+                Span::styled("d", Style::default().fg(Color::Yellow).bold()),
+                Span::raw(" deprecate"),
+            ]),
+        };
+        frame.render_widget(help, chunks[1]);
+    }
 }
 
-fn handle_key(app: &mut App, key: KeyEvent) {
+fn handle_key(app: &mut App, key: KeyEvent) -> Option<TuiAction> {
+    // Clear status on any keypress
+    app.clear_status();
+
+    // Handle overlay input first
+    match &app.overlay {
+        Overlay::ConfirmDeprecate => {
+            match key.code {
+                KeyCode::Char('y') => return Some(TuiAction::Deprecate),
+                KeyCode::Char('n') | KeyCode::Esc => app.close_overlay(),
+                _ => {}
+            }
+            return None;
+        }
+        Overlay::CreateForm => {
+            match key.code {
+                KeyCode::Esc => app.close_overlay(),
+                KeyCode::Tab => app.create_form.next_field(),
+                KeyCode::BackTab => app.create_form.prev_field(),
+                KeyCode::Enter => return Some(TuiAction::Create),
+                _ => {
+                    app.create_form.handle_input(key);
+                }
+            }
+            return None;
+        }
+        Overlay::AddEdgeForm => {
+            match key.code {
+                KeyCode::Esc => app.close_overlay(),
+                KeyCode::Tab => app.add_edge_form.next_field(),
+                KeyCode::BackTab => app.add_edge_form.prev_field(),
+                KeyCode::Left if app.add_edge_form.focused_field == 1 => {
+                    app.add_edge_form.prev_type();
+                }
+                KeyCode::Right if app.add_edge_form.focused_field == 1 => {
+                    app.add_edge_form.next_type();
+                }
+                KeyCode::Enter => return Some(TuiAction::AddEdge),
+                _ => {
+                    app.add_edge_form.handle_input(key);
+                }
+            }
+            return None;
+        }
+        Overlay::None => {}
+    }
+
+    // Normal view handling
     match app.view {
         View::NodeList => match key.code {
             KeyCode::Char('q') => app.quit(),
@@ -122,6 +215,8 @@ fn handle_key(app: &mut App, key: KeyEvent) {
             KeyCode::Enter => app.enter_detail(),
             KeyCode::Char('/') => app.enter_search(),
             KeyCode::Char('s') => app.cycle_sort(),
+            KeyCode::Char('c') => app.open_create_form(),
+            KeyCode::Char('d') => app.confirm_deprecate(),
             _ => {}
         },
         View::NodeDetail => {
@@ -134,6 +229,9 @@ fn handle_key(app: &mut App, key: KeyEvent) {
                 KeyCode::Tab => app.detail_state.next_edge(edge_count),
                 KeyCode::BackTab => app.detail_state.prev_edge(edge_count),
                 KeyCode::Enter => app.navigate_to_edge(),
+                KeyCode::Char('e') => return Some(TuiAction::Edit),
+                KeyCode::Char('d') => app.confirm_deprecate(),
+                KeyCode::Char('a') => app.open_add_edge_form(),
                 _ => {}
             }
         }
@@ -150,5 +248,143 @@ fn handle_key(app: &mut App, key: KeyEvent) {
                 app.execute_search();
             }
         },
+    }
+    None
+}
+
+fn process_action(
+    app: &mut App,
+    terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
+    events: &EventHandler,
+    action: TuiAction,
+) -> anyhow::Result<()> {
+    match action {
+        TuiAction::Create => {
+            let id = app.create_form.id_input.value().trim().to_string();
+            let content = app.create_form.content_input.value().trim().to_string();
+            let weight: u8 = app
+                .create_form
+                .weight_input
+                .value()
+                .trim()
+                .parse()
+                .unwrap_or(50);
+            app.close_overlay();
+            match mutations::create_node(&app.engram_dir, &id, &content, weight) {
+                Ok(_) => {
+                    reload(app)?;
+                    app.set_status(format!("Created '{id}'"), false);
+                }
+                Err(e) => app.set_status(format!("Error: {e}"), true),
+            }
+        }
+        TuiAction::Edit => {
+            if let Some(node) = app.selected_node().cloned() {
+                let yaml = serde_yaml::to_string(&node).unwrap_or_default();
+
+                // Suspend TUI and event handler
+                events.pause();
+                disable_raw_mode()?;
+                execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
+                terminal.show_cursor()?;
+
+                let result = edit_in_editor(&yaml);
+
+                // Resume TUI and event handler
+                enable_raw_mode()?;
+                execute!(terminal.backend_mut(), EnterAlternateScreen)?;
+                terminal.hide_cursor()?;
+                terminal.clear()?;
+                events.resume();
+
+                match result {
+                    Ok(new_yaml) => {
+                        match mutations::update_node_from_yaml(&app.engram_dir, &node.id, &new_yaml)
+                        {
+                            Ok(_) => {
+                                reload(app)?;
+                                app.set_status(format!("Updated '{}'", node.id), false);
+                            }
+                            Err(e) => app.set_status(format!("Error: {e}"), true),
+                        }
+                    }
+                    Err(e) => app.set_status(format!("{e}"), true),
+                }
+            }
+        }
+        TuiAction::Deprecate => {
+            if let Some(node) = app.selected_node().cloned() {
+                app.close_overlay();
+                match mutations::deprecate_node(&app.engram_dir, &node.id) {
+                    Ok(()) => {
+                        reload(app)?;
+                        app.set_status(format!("Deprecated '{}'", node.id), false);
+                    }
+                    Err(e) => app.set_status(format!("Error: {e}"), true),
+                }
+            }
+        }
+        TuiAction::AddEdge => {
+            if let Some(node) = app.selected_node().cloned() {
+                let target = app.add_edge_form.target_input.value().trim().to_string();
+                let edge_type_str = EDGE_TYPES[app.add_edge_form.edge_type_index];
+                let weight: u8 = app
+                    .add_edge_form
+                    .weight_input
+                    .value()
+                    .trim()
+                    .parse()
+                    .unwrap_or(50);
+                app.close_overlay();
+                let edge = parse_edge_type(edge_type_str, &target, weight);
+                match mutations::add_edge(&app.engram_dir, &node.id, edge) {
+                    Ok(_) => {
+                        reload(app)?;
+                        app.set_status(format!("Added edge → {target}"), false);
+                    }
+                    Err(e) => app.set_status(format!("Error: {e}"), true),
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+fn reload(app: &mut App) -> anyhow::Result<()> {
+    let nodes = crate::storage::load_all_nodes(&app.engram_dir)?;
+    app.reload_nodes(nodes);
+    Ok(())
+}
+
+fn edit_in_editor(template: &str) -> anyhow::Result<String> {
+    let editor = std::env::var("EDITOR").unwrap_or_else(|_| "vi".to_string());
+    let tmp = std::env::temp_dir().join(format!("engram-tui-{}.yaml", std::process::id()));
+    std::fs::write(&tmp, template)?;
+    let status = std::process::Command::new(&editor).arg(&tmp).status()?;
+    if !status.success() {
+        std::fs::remove_file(&tmp).ok();
+        anyhow::bail!("Editor exited with error");
+    }
+    let content = std::fs::read_to_string(&tmp)?;
+    std::fs::remove_file(&tmp).ok();
+    if content.trim().is_empty() || content == template {
+        anyhow::bail!("Aborted: no changes made");
+    }
+    Ok(content)
+}
+
+fn parse_edge_type(type_str: &str, target: &str, weight: u8) -> crate::models::node::Edge {
+    use crate::models::node::{Edge, EdgeType};
+    let edge_type = match type_str {
+        "uses" => EdgeType::Uses,
+        "depends_on" => EdgeType::DependsOn,
+        "implements" => EdgeType::Implements,
+        "rationale" => EdgeType::Rationale,
+        _ => EdgeType::Related,
+    };
+    Edge {
+        to: target.to_string(),
+        edge_type,
+        weight,
     }
 }

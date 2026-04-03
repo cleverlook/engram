@@ -17,6 +17,116 @@ pub enum SortBy {
     Status,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Overlay {
+    None,
+    ConfirmDeprecate,
+    CreateForm,
+    AddEdgeForm,
+}
+
+pub const EDGE_TYPES: &[&str] = &["uses", "depends_on", "implements", "rationale", "related"];
+
+pub struct CreateFormState {
+    pub id_input: Input,
+    pub content_input: Input,
+    pub weight_input: Input,
+    pub focused_field: usize,
+}
+
+impl CreateFormState {
+    pub fn new() -> Self {
+        let mut weight = Input::default();
+        for c in "50".chars() {
+            weight.handle(tui_input::InputRequest::InsertChar(c));
+        }
+        Self {
+            id_input: Input::default(),
+            content_input: Input::default(),
+            weight_input: weight,
+            focused_field: 0,
+        }
+    }
+
+    pub fn next_field(&mut self) {
+        self.focused_field = (self.focused_field + 1) % 3;
+    }
+
+    pub fn prev_field(&mut self) {
+        self.focused_field = if self.focused_field == 0 {
+            2
+        } else {
+            self.focused_field - 1
+        };
+    }
+
+    pub fn handle_input(&mut self, key: crossterm::event::KeyEvent) {
+        use tui_input::backend::crossterm::EventHandler;
+        let input = match self.focused_field {
+            0 => &mut self.id_input,
+            1 => &mut self.content_input,
+            _ => &mut self.weight_input,
+        };
+        input.handle_event(&crossterm::event::Event::Key(key));
+    }
+}
+
+pub struct AddEdgeFormState {
+    pub target_input: Input,
+    pub edge_type_index: usize,
+    pub weight_input: Input,
+    pub focused_field: usize,
+}
+
+impl AddEdgeFormState {
+    pub fn new() -> Self {
+        let mut weight = Input::default();
+        for c in "50".chars() {
+            weight.handle(tui_input::InputRequest::InsertChar(c));
+        }
+        Self {
+            target_input: Input::default(),
+            edge_type_index: 0,
+            weight_input: weight,
+            focused_field: 0,
+        }
+    }
+
+    pub fn next_field(&mut self) {
+        self.focused_field = (self.focused_field + 1) % 3;
+    }
+
+    pub fn prev_field(&mut self) {
+        self.focused_field = if self.focused_field == 0 {
+            2
+        } else {
+            self.focused_field - 1
+        };
+    }
+
+    pub fn next_type(&mut self) {
+        self.edge_type_index = (self.edge_type_index + 1) % EDGE_TYPES.len();
+    }
+
+    pub fn prev_type(&mut self) {
+        self.edge_type_index = if self.edge_type_index == 0 {
+            EDGE_TYPES.len() - 1
+        } else {
+            self.edge_type_index - 1
+        };
+    }
+
+    pub fn handle_input(&mut self, key: crossterm::event::KeyEvent) {
+        use tui_input::backend::crossterm::EventHandler;
+        let input = match self.focused_field {
+            0 => &mut self.target_input,
+            2 => &mut self.weight_input,
+            _ => return, // type field uses left/right, not text input
+        };
+        input.handle_event(&crossterm::event::Event::Key(key));
+    }
+}
+
 pub struct DetailState {
     pub scroll: u16,
     pub selected_edge: usize,
@@ -98,6 +208,10 @@ pub struct App {
     pub detail_state: DetailState,
     pub search_state: SearchState,
     pub sort_by: SortBy,
+    pub overlay: Overlay,
+    pub create_form: CreateFormState,
+    pub add_edge_form: AddEdgeFormState,
+    pub status_message: Option<(String, bool)>, // (message, is_error)
 }
 
 impl App {
@@ -112,6 +226,10 @@ impl App {
             detail_state: DetailState::new(),
             search_state: SearchState::new(),
             sort_by: SortBy::Id,
+            overlay: Overlay::None,
+            create_form: CreateFormState::new(),
+            add_edge_form: AddEdgeFormState::new(),
+            status_message: None,
         }
     }
 
@@ -242,6 +360,53 @@ impl App {
         {
             self.selected_index = pos;
         }
+    }
+
+    pub fn reload_nodes(&mut self, mut nodes: Vec<Node>) {
+        let selected_id = self.selected_node().map(|n| n.id.clone());
+        match self.sort_by {
+            SortBy::Id => nodes.sort_by(|a, b| a.id.cmp(&b.id)),
+            SortBy::Weight => nodes.sort_by(|a, b| b.weight.cmp(&a.weight)),
+            SortBy::Touched => nodes.sort_by(|a, b| b.touched.cmp(&a.touched)),
+            SortBy::Status => {
+                nodes.sort_by(|a, b| format!("{:?}", a.status).cmp(&format!("{:?}", b.status)))
+            }
+        }
+        self.nodes = nodes;
+        if let Some(id) = selected_id
+            && let Some(pos) = self.nodes.iter().position(|n| n.id == id)
+        {
+            self.selected_index = pos;
+        }
+        if self.selected_index >= self.nodes.len() {
+            self.selected_index = self.nodes.len().saturating_sub(1);
+        }
+    }
+
+    pub fn open_create_form(&mut self) {
+        self.create_form = CreateFormState::new();
+        self.overlay = Overlay::CreateForm;
+    }
+
+    pub fn open_add_edge_form(&mut self) {
+        self.add_edge_form = AddEdgeFormState::new();
+        self.overlay = Overlay::AddEdgeForm;
+    }
+
+    pub fn confirm_deprecate(&mut self) {
+        self.overlay = Overlay::ConfirmDeprecate;
+    }
+
+    pub fn close_overlay(&mut self) {
+        self.overlay = Overlay::None;
+    }
+
+    pub fn set_status(&mut self, msg: String, is_error: bool) {
+        self.status_message = Some((msg, is_error));
+    }
+
+    pub fn clear_status(&mut self) {
+        self.status_message = None;
     }
 }
 
@@ -397,5 +562,55 @@ mod tests {
         assert_eq!(app.selected_index, 0);
         assert_eq!(app.selected_node().unwrap().id, "a");
         assert!(app.detail_state.history.is_empty());
+    }
+
+    #[test]
+    fn reload_nodes_updates_list() {
+        let nodes = vec![make_node("a"), make_node("b")];
+        let mut app = App::new(nodes, std::path::PathBuf::from("/tmp"));
+        assert_eq!(app.nodes.len(), 2);
+        let new_nodes = vec![make_node("a"), make_node("b"), make_node("c")];
+        app.reload_nodes(new_nodes);
+        assert_eq!(app.nodes.len(), 3);
+    }
+
+    #[test]
+    fn reload_nodes_preserves_selection_by_id() {
+        let nodes = vec![make_node("a"), make_node("b"), make_node("c")];
+        let mut app = App::new(nodes, std::path::PathBuf::from("/tmp"));
+        app.selected_index = 1; // "b"
+        let new_nodes = vec![make_node("c"), make_node("a"), make_node("b")];
+        app.reload_nodes(new_nodes);
+        assert_eq!(app.selected_node().unwrap().id, "b");
+    }
+
+    #[test]
+    fn create_form_field_cycling() {
+        let mut form = CreateFormState::new();
+        assert_eq!(form.focused_field, 0);
+        form.next_field();
+        assert_eq!(form.focused_field, 1);
+        form.next_field();
+        assert_eq!(form.focused_field, 2);
+        form.next_field();
+        assert_eq!(form.focused_field, 0);
+    }
+
+    #[test]
+    fn add_edge_form_type_cycling() {
+        let mut form = AddEdgeFormState::new();
+        assert_eq!(form.edge_type_index, 0);
+        form.next_type();
+        assert_eq!(form.edge_type_index, 1);
+        form.prev_type();
+        assert_eq!(form.edge_type_index, 0);
+        form.prev_type();
+        assert_eq!(form.edge_type_index, EDGE_TYPES.len() - 1);
+    }
+
+    #[test]
+    fn create_form_default_weight() {
+        let form = CreateFormState::new();
+        assert_eq!(form.weight_input.value(), "50");
     }
 }
