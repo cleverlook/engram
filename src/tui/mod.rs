@@ -57,7 +57,7 @@ fn run_loop(
     let events = EventHandler::new(Duration::from_millis(250));
 
     while app.running {
-        terminal.draw(|frame| render(&app, frame))?;
+        terminal.draw(|frame| render(&mut app, frame))?;
 
         match events.next()? {
             Event::Key(key) if key.kind == KeyEventKind::Press => {
@@ -72,7 +72,7 @@ fn run_loop(
     Ok(())
 }
 
-fn render(app: &App, frame: &mut Frame) {
+fn render(app: &mut App, frame: &mut Frame) {
     let area = frame.area();
 
     // Main layout: content + help bar at bottom
@@ -82,7 +82,7 @@ fn render(app: &App, frame: &mut Frame) {
         .split(area);
 
     match app.view {
-        View::NodeList => views::node_list::render(app, frame, chunks[0]),
+        View::NodeList => views::node_tree::render(app, frame, chunks[0]),
         View::NodeDetail => {
             if let Some(node) = app.nodes.get(app.selected_index) {
                 views::node_detail::render(node, &app.detail_state, frame, chunks[0]);
@@ -143,8 +143,10 @@ fn render(app: &App, frame: &mut Frame) {
                 Span::raw(" quit  "),
                 Span::styled("j/k", Style::default().fg(Color::Yellow).bold()),
                 Span::raw(" navigate  "),
+                Span::styled("h/l", Style::default().fg(Color::Yellow).bold()),
+                Span::raw(" collapse/expand  "),
                 Span::styled("Enter", Style::default().fg(Color::Yellow).bold()),
-                Span::raw(" detail  "),
+                Span::raw(" open  "),
                 Span::styled("/", Style::default().fg(Color::Yellow).bold()),
                 Span::raw(" search  "),
                 Span::styled("s", Style::default().fg(Color::Yellow).bold()),
@@ -208,17 +210,42 @@ fn handle_key(app: &mut App, key: KeyEvent) -> Option<TuiAction> {
 
     // Normal view handling
     match app.view {
-        View::NodeList => match key.code {
-            KeyCode::Char('q') => app.quit(),
-            KeyCode::Down | KeyCode::Char('j') => app.next(),
-            KeyCode::Up | KeyCode::Char('k') => app.previous(),
-            KeyCode::Enter => app.enter_detail(),
-            KeyCode::Char('/') => app.enter_search(),
-            KeyCode::Char('s') => app.cycle_sort(),
-            KeyCode::Char('c') => app.open_create_form(),
-            KeyCode::Char('d') => app.confirm_deprecate(),
-            _ => {}
-        },
+        View::NodeList => {
+            match key.code {
+                KeyCode::Char('q') => app.quit(),
+                KeyCode::Down | KeyCode::Char('j') => {
+                    app.tree_state.key_down();
+                }
+                KeyCode::Up | KeyCode::Char('k') => {
+                    app.tree_state.key_up();
+                }
+                KeyCode::Right | KeyCode::Char('l') => {
+                    app.tree_state.key_right();
+                }
+                KeyCode::Left | KeyCode::Char('h') => {
+                    app.tree_state.key_left();
+                }
+                KeyCode::Enter => {
+                    if views::node_tree::is_leaf_selected(app) {
+                        // Navigate to detail view for the selected leaf node
+                        if let Some(node) = views::node_tree::selected_node_from_tree(app) {
+                            let node_id = node.id.clone();
+                            if let Some(pos) = app.nodes.iter().position(|n| n.id == node_id) {
+                                app.selected_index = pos;
+                                app.enter_detail();
+                            }
+                        }
+                    } else {
+                        app.tree_state.toggle_selected();
+                    }
+                }
+                KeyCode::Char('/') => app.enter_search(),
+                KeyCode::Char('s') => app.cycle_sort(),
+                KeyCode::Char('c') => app.open_create_form(),
+                KeyCode::Char('d') => app.confirm_deprecate(),
+                _ => {}
+            }
+        }
         View::NodeDetail => {
             let edge_count = app.selected_node().map(|n| n.edges.len()).unwrap_or(0);
             match key.code {

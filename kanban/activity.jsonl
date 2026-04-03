@@ -99,3 +99,8 @@
 {"timestamp":"2026-04-03T17:54:26.506139+02:00","action":"edit","task_id":32,"detail":"TUI: fix $EDITOR suspend - stop EventHandler thread during editor"}
 {"timestamp":"2026-04-03T17:54:26.506496+02:00","action":"release","task_id":32,"detail":"claude"}
 {"timestamp":"2026-04-03T17:54:26.521298+02:00","action":"move","task_id":32,"detail":"in-progress -\u003e done"}
+{"timestamp":"2026-04-03T18:02:38.974824+02:00","action":"move","task_id":33,"detail":"backlog -\u003e todo"}
+{"timestamp":"2026-04-03T18:02:38.990055+02:00","action":"move","task_id":33,"detail":"todo -\u003e in-progress"}
+{"timestamp":"2026-04-03T21:10:02.009376+02:00","action":"edit","task_id":33,"detail":"TUI: tree view as default - namespace hierarchy instead of flat list"}
+{"timestamp":"2026-04-03T21:10:02.010685+02:00","action":"release","task_id":33,"detail":"claude"}
+{"timestamp":"2026-04-03T21:10:02.085576+02:00","action":"move","task_id":33,"detail":"in-progress -\u003e done"}

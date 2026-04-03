@@ -1,4 +1,5 @@
 use tui_input::Input;
+use tui_tree_widget::TreeState;
 
 use crate::models::node::Node;
 
@@ -212,6 +213,7 @@ pub struct App {
     pub create_form: CreateFormState,
     pub add_edge_form: AddEdgeFormState,
     pub status_message: Option<(String, bool)>, // (message, is_error)
+    pub tree_state: TreeState<String>,
 }
 
 impl App {
@@ -230,6 +232,7 @@ impl App {
             create_form: CreateFormState::new(),
             add_edge_form: AddEdgeFormState::new(),
             status_message: None,
+            tree_state: TreeState::default(),
         }
     }
 
@@ -239,22 +242,6 @@ impl App {
 
     pub fn selected_node(&self) -> Option<&Node> {
         self.nodes.get(self.selected_index)
-    }
-
-    pub fn next(&mut self) {
-        if !self.nodes.is_empty() {
-            self.selected_index = (self.selected_index + 1) % self.nodes.len();
-        }
-    }
-
-    pub fn previous(&mut self) {
-        if !self.nodes.is_empty() {
-            self.selected_index = if self.selected_index == 0 {
-                self.nodes.len() - 1
-            } else {
-                self.selected_index - 1
-            };
-        }
     }
 
     pub fn enter_detail(&mut self) {
@@ -420,17 +407,6 @@ mod tests {
     }
 
     #[test]
-    fn navigation_wraps_around() {
-        let nodes = vec![make_node("a"), make_node("b"), make_node("c")];
-        let mut app = App::new(nodes, std::path::PathBuf::from("/tmp"));
-        assert_eq!(app.selected_index, 0);
-        app.previous(); // wrap to end
-        assert_eq!(app.selected_index, 2);
-        app.next(); // wrap to start
-        assert_eq!(app.selected_index, 0);
-    }
-
-    #[test]
     fn enter_detail_and_back() {
         let nodes = vec![make_node("a")];
         let mut app = App::new(nodes, std::path::PathBuf::from("/tmp"));
@@ -448,15 +424,6 @@ mod tests {
         assert_eq!(app.view, View::Search);
         app.back();
         assert_eq!(app.view, View::NodeList);
-    }
-
-    #[test]
-    fn empty_nodes_navigation_safe() {
-        let mut app = App::new(vec![], std::path::PathBuf::from("/tmp"));
-        app.next(); // should not panic
-        app.previous(); // should not panic
-        assert_eq!(app.selected_index, 0);
-        assert!(app.selected_node().is_none());
     }
 
     #[test]
