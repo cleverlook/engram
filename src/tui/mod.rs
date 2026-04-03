@@ -82,20 +82,34 @@ fn render(app: &App, frame: &mut Frame) {
     }
 
     // Help bar
-    let help = Line::from(vec![
-        Span::styled(" q", Style::default().fg(Color::Yellow).bold()),
-        Span::raw(" quit  "),
-        Span::styled("j/k", Style::default().fg(Color::Yellow).bold()),
-        Span::raw(" navigate  "),
-        Span::styled("Enter", Style::default().fg(Color::Yellow).bold()),
-        Span::raw(" detail  "),
-        Span::styled("/", Style::default().fg(Color::Yellow).bold()),
-        Span::raw(" search  "),
-        Span::styled("s", Style::default().fg(Color::Yellow).bold()),
-        Span::raw(" sort  "),
-        Span::styled("Esc", Style::default().fg(Color::Yellow).bold()),
-        Span::raw(" back"),
-    ]);
+    let help = match app.view {
+        View::NodeDetail => Line::from(vec![
+            Span::styled(" q", Style::default().fg(Color::Yellow).bold()),
+            Span::raw(" quit  "),
+            Span::styled("j/k", Style::default().fg(Color::Yellow).bold()),
+            Span::raw(" scroll  "),
+            Span::styled("Tab", Style::default().fg(Color::Yellow).bold()),
+            Span::raw(" select edge  "),
+            Span::styled("Enter", Style::default().fg(Color::Yellow).bold()),
+            Span::raw(" follow edge  "),
+            Span::styled("Bksp", Style::default().fg(Color::Yellow).bold()),
+            Span::raw(" back"),
+        ]),
+        _ => Line::from(vec![
+            Span::styled(" q", Style::default().fg(Color::Yellow).bold()),
+            Span::raw(" quit  "),
+            Span::styled("j/k", Style::default().fg(Color::Yellow).bold()),
+            Span::raw(" navigate  "),
+            Span::styled("Enter", Style::default().fg(Color::Yellow).bold()),
+            Span::raw(" detail  "),
+            Span::styled("/", Style::default().fg(Color::Yellow).bold()),
+            Span::raw(" search  "),
+            Span::styled("s", Style::default().fg(Color::Yellow).bold()),
+            Span::raw(" sort  "),
+            Span::styled("Esc", Style::default().fg(Color::Yellow).bold()),
+            Span::raw(" back"),
+        ]),
+    };
     frame.render_widget(help, chunks[1]);
 }
 
@@ -110,13 +124,19 @@ fn handle_key(app: &mut App, key: KeyEvent) {
             KeyCode::Char('s') => app.cycle_sort(),
             _ => {}
         },
-        View::NodeDetail => match key.code {
-            KeyCode::Char('q') => app.quit(),
-            KeyCode::Esc => app.back(),
-            KeyCode::Down | KeyCode::Char('j') => app.detail_state.scroll_down(),
-            KeyCode::Up | KeyCode::Char('k') => app.detail_state.scroll_up(),
-            _ => {}
-        },
+        View::NodeDetail => {
+            let edge_count = app.selected_node().map(|n| n.edges.len()).unwrap_or(0);
+            match key.code {
+                KeyCode::Char('q') => app.quit(),
+                KeyCode::Esc | KeyCode::Backspace | KeyCode::Char('h') => app.navigate_back(),
+                KeyCode::Down | KeyCode::Char('j') => app.detail_state.scroll_down(),
+                KeyCode::Up | KeyCode::Char('k') => app.detail_state.scroll_up(),
+                KeyCode::Tab => app.detail_state.next_edge(edge_count),
+                KeyCode::BackTab => app.detail_state.prev_edge(edge_count),
+                KeyCode::Enter => app.navigate_to_edge(),
+                _ => {}
+            }
+        }
         View::Search => match key.code {
             KeyCode::Esc => app.back(),
             KeyCode::Enter => app.open_search_result(),

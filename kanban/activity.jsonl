@@ -82,3 +82,5 @@
 {"timestamp":"2026-03-20T19:25:54.961157+01:00","action":"move","task_id":30,"detail":"in-progress -\u003e done"}
 {"timestamp":"2026-03-20T19:25:54.976997+01:00","action":"move","task_id":29,"detail":"backlog -\u003e in-progress"}
 {"timestamp":"2026-03-20T19:27:51.655387+01:00","action":"move","task_id":29,"detail":"in-progress -\u003e done"}
+{"timestamp":"2026-04-03T12:56:28.162716+02:00","action":"move","task_id":18,"detail":"backlog -\u003e done"}
+{"timestamp":"2026-04-03T15:29:54.005335+02:00","action":"move","task_id":23,"detail":"backlog -\u003e done"}

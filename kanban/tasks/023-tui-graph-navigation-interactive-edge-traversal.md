@@ -1,10 +1,12 @@
 ---
 id: 23
 title: 'TUI: Graph navigation - interactive edge traversal with history stack'
-status: backlog
+status: done
 priority: medium
 created: 2026-03-17T17:43:37.802371+01:00
-updated: 2026-03-17T17:43:37.802371+01:00
+updated: 2026-04-03T15:29:54.004928+02:00
+started: 2026-04-03T15:29:54.004928+02:00
+completed: 2026-04-03T15:29:54.004928+02:00
 tags:
     - tui
     - graph

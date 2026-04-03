@@ -16,6 +16,19 @@ pub fn render(node: &Node, state: &DetailState, frame: &mut Frame, area: Rect) {
     )));
     lines.push(Line::from(""));
 
+    // History breadcrumb
+    if !state.history.is_empty() {
+        let steps = state.history.len();
+        lines.push(Line::from(Span::styled(
+            format!(
+                "  ← {} step{} back (Backspace)",
+                steps,
+                if steps == 1 { "" } else { "s" }
+            ),
+            Style::default().fg(Color::DarkGray).italic(),
+        )));
+    }
+
     // Metadata
     lines.push(Line::from(vec![
         Span::styled("Status:  ", Style::default().fg(Color::DarkGray)),
@@ -58,13 +71,25 @@ pub fn render(node: &Node, state: &DetailState, frame: &mut Frame, area: Rect) {
     if !node.edges.is_empty() {
         lines.push(Line::from(""));
         lines.push(Line::from(Span::styled(
-            "── Edges ────────────────────────────",
+            "── Edges (Tab: select, Enter: follow) ─",
             Style::default().fg(Color::Yellow),
         )));
-        for edge in &node.edges {
+        for (i, edge) in node.edges.iter().enumerate() {
+            let selected = i == state.selected_edge;
+            let marker = if selected { "▶ → " } else { "  → " };
+            let marker_style = if selected {
+                Style::default().fg(Color::Yellow)
+            } else {
+                Style::default()
+            };
+            let id_style = if selected {
+                Style::default().fg(Color::Cyan).bold().underlined()
+            } else {
+                Style::default().fg(Color::Cyan).bold()
+            };
             lines.push(Line::from(vec![
-                Span::raw("  → "),
-                Span::styled(&edge.to, Style::default().fg(Color::Cyan).bold()),
+                Span::styled(marker, marker_style),
+                Span::styled(&edge.to, id_style),
                 Span::styled(
                     format!("  [{:?}  w:{}]", edge.edge_type, edge.weight),
                     Style::default().fg(Color::DarkGray),
