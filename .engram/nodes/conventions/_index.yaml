@@ -1,0 +1,5 @@
+namespace: conventions
+nodes:
+- id: conventions:commit_messages
+  weight: 50
+  status: active

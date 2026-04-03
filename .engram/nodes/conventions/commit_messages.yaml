@@ -1,0 +1,7 @@
+id: conventions:commit_messages
+content: |
+  When committing, write short semantic messages in imperative mood (type(scope): description). No Co-Authored-By, no signed-off-by, no boilerplate trailers. Keep git history clean and concise.
+weight: 50
+status: active
+created: 2026-04-03T10:50:58.800402Z
+touched: 2026-04-03T10:50:58.800402Z
