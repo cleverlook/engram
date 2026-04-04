@@ -1,10 +1,11 @@
 use ratatui::prelude::*;
 use ratatui::widgets::{
-    Block, Borders, Paragraph, Scrollbar, ScrollbarOrientation, ScrollbarState, Wrap,
+    Block, BorderType, Borders, Paragraph, Scrollbar, ScrollbarOrientation, ScrollbarState, Wrap,
 };
 
-use crate::models::node::{Node, NodeStatus};
+use crate::models::node::Node;
 use crate::tui::app::DetailState;
+use crate::tui::theme::{Theme, status_color, status_icon};
 
 pub fn render(node: &Node, state: &DetailState, frame: &mut Frame, area: Rect) {
     let mut lines: Vec<Line> = vec![];
@@ -14,7 +15,7 @@ pub fn render(node: &Node, state: &DetailState, frame: &mut Frame, area: Rect) {
         Span::raw(" "),
         Span::styled(
             &node.id,
-            Style::default().fg(Color::Cyan).bold().underlined(),
+            Style::default().fg(Theme::ACCENT).bold().underlined(),
         ),
     ]));
     lines.push(Line::from(""));
@@ -28,15 +29,15 @@ pub fn render(node: &Node, state: &DetailState, frame: &mut Frame, area: Rect) {
                 steps,
                 if steps == 1 { "" } else { "s" }
             ),
-            Style::default().fg(Color::DarkGray).italic(),
+            Style::default().fg(Theme::DIM).italic(),
         )));
     }
 
     // Metadata
-    let (icon, _) = status_icon(&node.status);
+    let icon = status_icon(&node.status);
     lines.push(Line::from(vec![
         Span::raw(" "),
-        Span::styled("Status:  ", Style::default().fg(Color::DarkGray)),
+        Span::styled("Status:  ", Style::default().fg(Theme::DIM)),
         Span::styled(
             format!("{icon} {:?}", node.status),
             Style::default().fg(status_color(&node.status)),
@@ -44,24 +45,24 @@ pub fn render(node: &Node, state: &DetailState, frame: &mut Frame, area: Rect) {
     ]));
     lines.push(Line::from(vec![
         Span::raw(" "),
-        Span::styled("Weight:  ", Style::default().fg(Color::DarkGray)),
+        Span::styled("Weight:  ", Style::default().fg(Theme::DIM)),
         Span::raw(format!("{}", node.weight)),
     ]));
     lines.push(Line::from(vec![
         Span::raw(" "),
-        Span::styled("Created: ", Style::default().fg(Color::DarkGray)),
+        Span::styled("Created: ", Style::default().fg(Theme::DIM)),
         Span::raw(node.created.format("%Y-%m-%d %H:%M UTC").to_string()),
     ]));
     lines.push(Line::from(vec![
         Span::raw(" "),
-        Span::styled("Touched: ", Style::default().fg(Color::DarkGray)),
+        Span::styled("Touched: ", Style::default().fg(Theme::DIM)),
         Span::raw(node.touched.format("%Y-%m-%d %H:%M UTC").to_string()),
     ]));
 
     if !node.source_files.is_empty() {
         lines.push(Line::from(vec![
             Span::raw(" "),
-            Span::styled("Sources: ", Style::default().fg(Color::DarkGray)),
+            Span::styled("Sources: ", Style::default().fg(Theme::DIM)),
             Span::raw(node.source_files.join(", ")),
         ]));
     }
@@ -70,7 +71,7 @@ pub fn render(node: &Node, state: &DetailState, frame: &mut Frame, area: Rect) {
     lines.push(Line::from(""));
     lines.push(Line::from(Span::styled(
         " ─── Content ──────────────────────────────────",
-        Style::default().fg(Color::Yellow),
+        Style::default().fg(Theme::HEADER),
     )));
     for line in node.content.lines() {
         lines.push(Line::from(format!("  {line}")));
@@ -81,27 +82,27 @@ pub fn render(node: &Node, state: &DetailState, frame: &mut Frame, area: Rect) {
         lines.push(Line::from(""));
         lines.push(Line::from(Span::styled(
             " ─── Edges ────────────────────────────────────",
-            Style::default().fg(Color::Yellow),
+            Style::default().fg(Theme::HEADER),
         )));
         for (i, edge) in node.edges.iter().enumerate() {
             let selected = i == state.selected_edge;
             let marker = if selected { " ▶ → " } else { "   → " };
             let marker_style = if selected {
-                Style::default().fg(Color::Yellow)
+                Style::default().fg(Theme::HIGHLIGHT)
             } else {
-                Style::default()
+                Style::default().fg(Theme::SECONDARY)
             };
             let id_style = if selected {
-                Style::default().fg(Color::Cyan).bold().underlined()
+                Style::default().fg(Theme::SECONDARY).bold().underlined()
             } else {
-                Style::default().fg(Color::Cyan).bold()
+                Style::default().fg(Theme::SECONDARY).bold()
             };
             lines.push(Line::from(vec![
                 Span::styled(marker, marker_style),
                 Span::styled(&edge.to, id_style),
                 Span::styled(
                     format!("  [{:?}  w:{}]", edge.edge_type, edge.weight),
-                    Style::default().fg(Color::DarkGray),
+                    Style::default().fg(Theme::DIM),
                 ),
             ]));
         }
@@ -112,7 +113,7 @@ pub fn render(node: &Node, state: &DetailState, frame: &mut Frame, area: Rect) {
         lines.push(Line::from(""));
         lines.push(Line::from(Span::styled(
             " ─── Data Lake ────────────────────────────────",
-            Style::default().fg(Color::Yellow),
+            Style::default().fg(Theme::HEADER),
         )));
         for file in &node.data_lake {
             lines.push(Line::from(format!("   📎 {file}")));
@@ -125,8 +126,9 @@ pub fn render(node: &Node, state: &DetailState, frame: &mut Frame, area: Rect) {
         .block(
             Block::default()
                 .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
                 .title(format!(" {} ", node.id))
-                .title_style(Style::default().bold()),
+                .title_style(Style::default().fg(Theme::ACCENT).bold()),
         )
         .wrap(Wrap { trim: false })
         .scroll((state.scroll, 0));
@@ -142,22 +144,4 @@ pub fn render(node: &Node, state: &DetailState, frame: &mut Frame, area: Rect) {
         area,
         &mut scrollbar_state,
     );
-}
-
-fn status_color(status: &NodeStatus) -> Color {
-    match status {
-        NodeStatus::Active => Color::Green,
-        NodeStatus::Dirty => Color::Yellow,
-        NodeStatus::Stale => Color::Yellow,
-        NodeStatus::Deprecated => Color::Red,
-    }
-}
-
-fn status_icon(status: &NodeStatus) -> (&'static str, Color) {
-    match status {
-        NodeStatus::Active => ("●", Color::Green),
-        NodeStatus::Dirty => ("◐", Color::Yellow),
-        NodeStatus::Stale => ("○", Color::Yellow),
-        NodeStatus::Deprecated => ("✕", Color::Red),
-    }
 }

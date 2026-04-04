@@ -1,6 +1,7 @@
 mod app;
 mod event;
 mod mutations;
+mod theme;
 mod views;
 
 use std::io;
@@ -16,6 +17,7 @@ use ratatui::prelude::*;
 
 use app::{App, EDGE_TYPES, Overlay, STATUSES, View};
 use event::{Event, EventHandler};
+use theme::Theme;
 
 enum TuiAction {
     Create,
@@ -114,70 +116,70 @@ fn render(app: &mut App, frame: &mut Frame) {
     // Status message or help bar
     if let Some((msg, is_error)) = &app.status_message {
         let style = if *is_error {
-            Style::default().fg(Color::Red)
+            Style::default().fg(Theme::ERROR)
         } else {
-            Style::default().fg(Color::Green)
+            Style::default().fg(Theme::SUCCESS)
         };
         frame.render_widget(
             Line::from(Span::styled(format!(" {msg}"), style)),
             chunks[1],
         );
     } else {
-        let sep = Span::styled(" │ ", Style::default().fg(Color::DarkGray));
+        let sep = Span::styled(" │ ", Style::default().fg(Theme::DIM));
         let help = match app.view {
             View::NodeDetail => Line::from(vec![
                 Span::raw(" "),
-                Span::styled("j/k", Style::default().fg(Color::Yellow).bold()),
+                Span::styled("j/k", Style::default().fg(Theme::HIGHLIGHT).bold()),
                 Span::raw(" scroll"),
                 sep.clone(),
-                Span::styled("Tab", Style::default().fg(Color::Yellow).bold()),
+                Span::styled("Tab", Style::default().fg(Theme::HIGHLIGHT).bold()),
                 Span::raw(" edge"),
                 sep.clone(),
-                Span::styled("Enter", Style::default().fg(Color::Yellow).bold()),
+                Span::styled("Enter", Style::default().fg(Theme::HIGHLIGHT).bold()),
                 Span::raw(" follow"),
                 sep.clone(),
-                Span::styled("e", Style::default().fg(Color::Yellow).bold()),
+                Span::styled("e", Style::default().fg(Theme::HIGHLIGHT).bold()),
                 Span::raw(" edit"),
                 sep.clone(),
-                Span::styled("E", Style::default().fg(Color::Yellow).bold()),
+                Span::styled("E", Style::default().fg(Theme::HIGHLIGHT).bold()),
                 Span::raw(" raw"),
                 sep.clone(),
-                Span::styled("d", Style::default().fg(Color::Yellow).bold()),
+                Span::styled("d", Style::default().fg(Theme::HIGHLIGHT).bold()),
                 Span::raw(" deprecate"),
                 sep.clone(),
-                Span::styled("a", Style::default().fg(Color::Yellow).bold()),
+                Span::styled("a", Style::default().fg(Theme::HIGHLIGHT).bold()),
                 Span::raw(" edge"),
                 sep.clone(),
-                Span::styled("Bksp", Style::default().fg(Color::Yellow).bold()),
+                Span::styled("Bksp", Style::default().fg(Theme::HIGHLIGHT).bold()),
                 Span::raw(" back"),
                 sep.clone(),
-                Span::styled("q", Style::default().fg(Color::Yellow).bold()),
+                Span::styled("q", Style::default().fg(Theme::HIGHLIGHT).bold()),
                 Span::raw(" quit"),
             ]),
             _ => Line::from(vec![
                 Span::raw(" "),
-                Span::styled("j/k", Style::default().fg(Color::Yellow).bold()),
+                Span::styled("j/k", Style::default().fg(Theme::HIGHLIGHT).bold()),
                 Span::raw(" navigate"),
                 sep.clone(),
-                Span::styled("h/l", Style::default().fg(Color::Yellow).bold()),
+                Span::styled("h/l", Style::default().fg(Theme::HIGHLIGHT).bold()),
                 Span::raw(" collapse/expand"),
                 sep.clone(),
-                Span::styled("Enter", Style::default().fg(Color::Yellow).bold()),
+                Span::styled("Enter", Style::default().fg(Theme::HIGHLIGHT).bold()),
                 Span::raw(" open"),
                 sep.clone(),
-                Span::styled("/", Style::default().fg(Color::Yellow).bold()),
+                Span::styled("/", Style::default().fg(Theme::HIGHLIGHT).bold()),
                 Span::raw(" search"),
                 sep.clone(),
-                Span::styled("s", Style::default().fg(Color::Yellow).bold()),
+                Span::styled("s", Style::default().fg(Theme::HIGHLIGHT).bold()),
                 Span::raw(" sort"),
                 sep.clone(),
-                Span::styled("c", Style::default().fg(Color::Yellow).bold()),
+                Span::styled("c", Style::default().fg(Theme::HIGHLIGHT).bold()),
                 Span::raw(" create"),
                 sep.clone(),
-                Span::styled("d", Style::default().fg(Color::Yellow).bold()),
+                Span::styled("d", Style::default().fg(Theme::HIGHLIGHT).bold()),
                 Span::raw(" deprecate"),
                 sep.clone(),
-                Span::styled("q", Style::default().fg(Color::Yellow).bold()),
+                Span::styled("q", Style::default().fg(Theme::HIGHLIGHT).bold()),
                 Span::raw(" quit"),
             ]),
         };

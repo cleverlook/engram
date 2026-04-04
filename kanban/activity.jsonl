@@ -114,3 +114,12 @@
 {"timestamp":"2026-04-04T15:28:17.165013+02:00","action":"edit","task_id":35,"detail":"TUI: autocomplete/search for edge target selection"}
 {"timestamp":"2026-04-04T15:28:17.165687+02:00","action":"release","task_id":35,"detail":"claude"}
 {"timestamp":"2026-04-04T15:28:17.180433+02:00","action":"move","task_id":35,"detail":"in-progress -\u003e done"}
+{"timestamp":"2026-04-04T16:08:30.159509+02:00","action":"move","task_id":36,"detail":"backlog -\u003e todo"}
+{"timestamp":"2026-04-04T16:08:30.180827+02:00","action":"move","task_id":36,"detail":"todo -\u003e in-progress"}
+{"timestamp":"2026-04-04T17:09:01.694985+02:00","action":"edit","task_id":36,"detail":"TUI: visual polish - modern look, responsiveness"}
+{"timestamp":"2026-04-04T17:09:01.695622+02:00","action":"release","task_id":36,"detail":"claude"}
+{"timestamp":"2026-04-04T17:09:01.713364+02:00","action":"move","task_id":36,"detail":"in-progress -\u003e done"}
+{"timestamp":"2026-04-04T17:14:36.578036+02:00","action":"create","task_id":37,"detail":"TUI: Catppuccin Mocha theme with rounded borders"}
+{"timestamp":"2026-04-04T17:53:29.927846+02:00","action":"edit","task_id":37,"detail":"TUI: Catppuccin Mocha theme with rounded borders"}
+{"timestamp":"2026-04-04T17:53:29.928403+02:00","action":"release","task_id":37,"detail":"claude"}
+{"timestamp":"2026-04-04T17:53:29.943694+02:00","action":"move","task_id":37,"detail":"in-progress -\u003e done"}

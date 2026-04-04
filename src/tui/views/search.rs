@@ -1,8 +1,9 @@
 use ratatui::prelude::*;
-use ratatui::widgets::{Block, Borders, List, ListItem, ListState, Paragraph};
+use ratatui::widgets::{Block, BorderType, Borders, List, ListItem, ListState, Paragraph};
 
 use crate::models::node::Node;
 use crate::tui::app::SearchState;
+use crate::tui::theme::Theme;
 
 pub fn render(state: &SearchState, nodes: &[Node], frame: &mut Frame, area: Rect) {
     let chunks = Layout::default()
@@ -18,8 +19,9 @@ pub fn render(state: &SearchState, nodes: &[Node], frame: &mut Frame, area: Rect
         .block(
             Block::default()
                 .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
                 .title(" Search (FTS5) ")
-                .title_style(Style::default().fg(Color::Yellow).bold()),
+                .title_style(Style::default().fg(Theme::HIGHLIGHT).bold()),
         );
     frame.render_widget(input_widget, chunks[0]);
 
@@ -39,10 +41,10 @@ pub fn render(state: &SearchState, nodes: &[Node], frame: &mut Frame, area: Rect
                 .map(|n| n.content.lines().next().unwrap_or("").to_string())
                 .unwrap_or_default();
             ListItem::new(Line::from(vec![
-                Span::styled(id, Style::default().fg(Color::Cyan).bold()),
+                Span::styled(id, Style::default().fg(Theme::ACCENT).bold()),
                 Span::styled(
                     format!("  {}", truncate(&preview, 60)),
-                    Style::default().fg(Color::DarkGray),
+                    Style::default().fg(Theme::DIM),
                 ),
             ]))
         })
@@ -50,8 +52,13 @@ pub fn render(state: &SearchState, nodes: &[Node], frame: &mut Frame, area: Rect
 
     let results_title = format!(" Results ({}) ", state.results.len());
     let list = List::new(items)
-        .block(Block::default().borders(Borders::ALL).title(results_title))
-        .highlight_style(Style::default().bg(Color::DarkGray).bold())
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .title(results_title),
+        )
+        .highlight_style(Style::default().bg(Theme::SELECTED_BG).bold())
         .highlight_symbol("▶ ");
 
     let mut list_state = ListState::default();

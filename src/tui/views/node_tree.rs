@@ -1,11 +1,12 @@
 use std::collections::BTreeMap;
 
 use ratatui::prelude::*;
-use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
+use ratatui::widgets::{Block, BorderType, Borders, Paragraph, Wrap};
 use tui_tree_widget::{Block as TreeBlock, Tree, TreeItem};
 
-use crate::models::node::{Node, NodeStatus};
+use crate::models::node::Node;
 use crate::tui::app::{App, SortBy};
+use crate::tui::theme::{Theme, status_color, status_icon};
 
 pub fn render(app: &mut App, frame: &mut Frame, area: Rect) {
     let chunks = Layout::default()
@@ -86,7 +87,7 @@ fn build_items_from_map(
             let branch_id = format!("ns:{key}");
             let branch_label = Line::from(Span::styled(
                 key.clone(),
-                Style::default().fg(Color::Cyan).bold(),
+                Style::default().fg(Theme::ACCENT).bold(),
             ));
             if let Ok(item) = TreeItem::new(branch_id, branch_label, child_items) {
                 items.push(item);
@@ -124,37 +125,31 @@ fn sort_entries<'a>(entries: &mut Vec<(&'a String, &'a NsNode)>, nodes: &[Node],
 }
 
 fn format_leaf(label: &str, node: &Node) -> Line<'static> {
-    let (icon, color) = status_icon_color(&node.status);
+    let icon = status_icon(&node.status);
+    let color = status_color(&node.status);
     Line::from(vec![
         Span::styled(format!("{icon} "), Style::default().fg(color)),
-        Span::styled(label.to_string(), Style::default().fg(Color::White).bold()),
+        Span::styled(label.to_string(), Style::default().fg(Theme::TEXT).bold()),
         Span::styled(
             format!("  w:{}", node.weight),
-            Style::default().fg(Color::DarkGray),
+            Style::default().fg(Theme::DIM),
         ),
     ])
 }
 
-fn status_icon_color(status: &NodeStatus) -> (&'static str, Color) {
-    match status {
-        NodeStatus::Active => ("●", Color::Green),
-        NodeStatus::Dirty => ("◐", Color::Yellow),
-        NodeStatus::Stale => ("○", Color::Yellow),
-        NodeStatus::Deprecated => ("✕", Color::Red),
-    }
-}
-
 fn render_tree(app: &mut App, items: &[TreeItem<'static, String>], frame: &mut Frame, area: Rect) {
-    let tree_block = TreeBlock::bordered().title(format!(
-        " Nodes ({}) [sort: {:?}] ",
-        app.nodes.len(),
-        app.sort_by
-    ));
+    let tree_block = TreeBlock::bordered()
+        .border_type(BorderType::Rounded)
+        .title(format!(
+            " Nodes ({}) [sort: {:?}] ",
+            app.nodes.len(),
+            app.sort_by
+        ));
 
     let tree = Tree::new(items)
         .expect("tree items valid")
         .block(tree_block)
-        .highlight_style(Style::default().bg(Color::DarkGray).bold())
+        .highlight_style(Style::default().bg(Theme::SELECTED_BG).bold())
         .highlight_symbol("▶ ");
 
     frame.render_stateful_widget(tree, area, &mut app.tree_state);
@@ -165,32 +160,32 @@ fn render_preview(app: &App, frame: &mut Frame, area: Rect) {
 
     let content = match selected_node {
         Some(node) => {
-            let (icon, _) = status_icon_color(&node.status);
+            let icon = status_icon(&node.status);
             let mut lines = vec![
                 Line::from(vec![
                     Span::raw(" "),
-                    Span::styled("ID: ", Style::default().fg(Color::DarkGray)),
-                    Span::styled(&node.id, Style::default().bold()),
+                    Span::styled("ID: ", Style::default().fg(Theme::DIM)),
+                    Span::styled(&node.id, Style::default().fg(Theme::ACCENT).bold()),
                 ]),
                 Line::from(vec![
                     Span::raw(" "),
-                    Span::styled("Status: ", Style::default().fg(Color::DarkGray)),
+                    Span::styled("Status: ", Style::default().fg(Theme::DIM)),
                     Span::styled(
                         format!("{icon} {:?}", node.status),
-                        Style::default().fg(status_icon_color(&node.status).1),
+                        Style::default().fg(status_color(&node.status)),
                     ),
-                    Span::styled("  Weight: ", Style::default().fg(Color::DarkGray)),
+                    Span::styled("  Weight: ", Style::default().fg(Theme::DIM)),
                     Span::raw(format!("{}", node.weight)),
                 ]),
                 Line::from(vec![
                     Span::raw(" "),
-                    Span::styled("Touched: ", Style::default().fg(Color::DarkGray)),
+                    Span::styled("Touched: ", Style::default().fg(Theme::DIM)),
                     Span::raw(node.touched.format("%Y-%m-%d %H:%M").to_string()),
                 ]),
                 Line::from(""),
                 Line::from(Span::styled(
                     " ─── Content ──────────────────────────────────",
-                    Style::default().fg(Color::Yellow),
+                    Style::default().fg(Theme::HEADER),
                 )),
             ];
             for line in node.content.lines() {
@@ -203,15 +198,15 @@ fn render_preview(app: &App, frame: &mut Frame, area: Rect) {
                         " ─── Edges: {} ────────────────────────────────",
                         node.edges.len()
                     ),
-                    Style::default().fg(Color::Yellow),
+                    Style::default().fg(Theme::HEADER),
                 )));
                 for edge in &node.edges {
                     lines.push(Line::from(vec![
-                        Span::raw("   → "),
-                        Span::styled(&edge.to, Style::default().fg(Color::Cyan)),
+                        Span::styled("   → ", Style::default().fg(Theme::SECONDARY)),
+                        Span::styled(&edge.to, Style::default().fg(Theme::SECONDARY)),
                         Span::styled(
                             format!("  [{:?} w:{}]", edge.edge_type, edge.weight),
-                            Style::default().fg(Color::DarkGray),
+                            Style::default().fg(Theme::DIM),
                         ),
                     ]));
                 }
@@ -225,6 +220,7 @@ fn render_preview(app: &App, frame: &mut Frame, area: Rect) {
         .block(
             Block::default()
                 .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
                 .title(" Preview ")
                 .title_style(Style::default().bold()),
         )

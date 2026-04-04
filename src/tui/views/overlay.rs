@@ -1,7 +1,8 @@
 use ratatui::prelude::*;
-use ratatui::widgets::{Block, Borders, Clear, Paragraph, Wrap};
+use ratatui::widgets::{Block, BorderType, Borders, Clear, Paragraph, Wrap};
 
 use crate::tui::app::{AddEdgeFormState, CreateFormState, EDGE_TYPES, EditFormState, STATUSES};
+use crate::tui::theme::Theme;
 
 fn centered_rect(width: u16, height: u16, area: Rect) -> Rect {
     let x = area.x + (area.width.saturating_sub(width)) / 2;
@@ -15,17 +16,17 @@ pub fn render_confirm_deprecate(node_id: &str, frame: &mut Frame, area: Rect) {
     let lines = vec![
         Line::from(""),
         Line::from(vec![
-            Span::styled("  ⚠ ", Style::default().fg(Color::Yellow)),
+            Span::styled("  ⚠ ", Style::default().fg(Theme::WARNING)),
             Span::raw("Deprecate "),
-            Span::styled(node_id, Style::default().fg(Color::Cyan).bold()),
+            Span::styled(node_id, Style::default().fg(Theme::ACCENT).bold()),
             Span::raw("?"),
         ]),
         Line::from(""),
         Line::from(vec![
             Span::raw("  "),
-            Span::styled("[y]", Style::default().fg(Color::Green).bold()),
+            Span::styled("[y]", Style::default().fg(Theme::SUCCESS).bold()),
             Span::raw(" Yes   "),
-            Span::styled("[n/Esc]", Style::default().fg(Color::Red).bold()),
+            Span::styled("[n/Esc]", Style::default().fg(Theme::ERROR).bold()),
             Span::raw(" Cancel"),
         ]),
     ];
@@ -33,8 +34,9 @@ pub fn render_confirm_deprecate(node_id: &str, frame: &mut Frame, area: Rect) {
         .block(
             Block::default()
                 .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
                 .title(" Confirm Deprecate ")
-                .title_style(Style::default().fg(Color::Yellow).bold()),
+                .title_style(Style::default().fg(Theme::HIGHLIGHT).bold()),
         )
         .wrap(Wrap { trim: false });
     frame.render_widget(paragraph, popup);
@@ -48,8 +50,9 @@ pub fn render_create_form(state: &mut CreateFormState, frame: &mut Frame, area: 
 
     let outer = Block::default()
         .borders(Borders::ALL)
+        .border_type(BorderType::Rounded)
         .title(" Create Node ")
-        .title_style(Style::default().bold());
+        .title_style(Style::default().fg(Theme::ACCENT).bold());
     let inner = outer.inner(popup);
     frame.render_widget(outer, popup);
 
@@ -72,13 +75,13 @@ pub fn render_create_form(state: &mut CreateFormState, frame: &mut Frame, area: 
         "  "
     };
     let s0 = if state.focused_field == 0 {
-        Style::default().fg(Color::Yellow)
+        Style::default().fg(Theme::HIGHLIGHT)
     } else {
-        Style::default().fg(Color::DarkGray)
+        Style::default().fg(Theme::DIM)
     };
     let id_line = Line::from(vec![
         Span::styled(m0, s0),
-        Span::styled("ID: ", Style::default().fg(Color::Cyan)),
+        Span::styled("ID: ", Style::default().fg(Theme::SECONDARY)),
         Span::raw(state.id_input.value()),
     ]);
     frame.render_widget(id_line, chunks[0]);
@@ -87,10 +90,11 @@ pub fn render_create_form(state: &mut CreateFormState, frame: &mut Frame, area: 
     let content_focused = state.focused_field == 1;
     let content_block = Block::default()
         .borders(Borders::ALL)
+        .border_type(BorderType::Rounded)
         .border_style(if content_focused {
-            Style::default().fg(Color::Yellow)
+            Style::default().fg(Theme::HIGHLIGHT)
         } else {
-            Style::default().fg(Color::DarkGray)
+            Style::default().fg(Theme::DIM)
         })
         .title(if content_focused {
             " Content (editing) "
@@ -112,13 +116,13 @@ pub fn render_create_form(state: &mut CreateFormState, frame: &mut Frame, area: 
         "  "
     };
     let s2 = if state.focused_field == 2 {
-        Style::default().fg(Color::Yellow)
+        Style::default().fg(Theme::HIGHLIGHT)
     } else {
-        Style::default().fg(Color::DarkGray)
+        Style::default().fg(Theme::DIM)
     };
     let weight_line = Line::from(vec![
         Span::styled(m2, s2),
-        Span::styled("Weight: ", Style::default().fg(Color::Cyan)),
+        Span::styled("Weight: ", Style::default().fg(Theme::SECONDARY)),
         Span::raw(state.weight_input.value()),
     ]);
     frame.render_widget(weight_line, chunks[3]);
@@ -126,7 +130,7 @@ pub fn render_create_form(state: &mut CreateFormState, frame: &mut Frame, area: 
     // Help
     let help = Line::from(Span::styled(
         " Tab: next field  Ctrl+S: create  Esc: cancel",
-        Style::default().fg(Color::DarkGray),
+        Style::default().fg(Theme::DIM),
     ));
     frame.render_widget(help, chunks[5]);
 }
@@ -148,13 +152,13 @@ pub fn render_add_edge_form(state: &AddEdgeFormState, frame: &mut Frame, area: R
         "  "
     };
     let s0 = if state.focused_field == 0 {
-        Style::default().fg(Color::Yellow)
+        Style::default().fg(Theme::HIGHLIGHT)
     } else {
-        Style::default().fg(Color::DarkGray)
+        Style::default().fg(Theme::DIM)
     };
     lines.push(Line::from(vec![
         Span::styled(m0, s0),
-        Span::styled("Target:", Style::default().fg(Color::Cyan)),
+        Span::styled("Target:", Style::default().fg(Theme::SECONDARY)),
         Span::raw(" "),
         Span::raw(state.target_input.value()),
     ]));
@@ -165,9 +169,9 @@ pub fn render_add_edge_form(state: &AddEdgeFormState, frame: &mut Frame, area: R
             let is_selected = i == state.selected_suggestion;
             let prefix = if is_selected { "   ▶ " } else { "     " };
             let style = if is_selected {
-                Style::default().fg(Color::White).bg(Color::DarkGray)
+                Style::default().fg(Theme::TEXT).bg(Theme::SELECTED_BG)
             } else {
-                Style::default().fg(Color::DarkGray)
+                Style::default().fg(Theme::DIM)
             };
             lines.push(Line::from(Span::styled(
                 format!("{prefix}{suggestion}"),
@@ -185,13 +189,13 @@ pub fn render_add_edge_form(state: &AddEdgeFormState, frame: &mut Frame, area: R
         "  "
     };
     let s1 = if state.focused_field == 1 {
-        Style::default().fg(Color::Yellow)
+        Style::default().fg(Theme::HIGHLIGHT)
     } else {
-        Style::default().fg(Color::DarkGray)
+        Style::default().fg(Theme::DIM)
     };
     lines.push(Line::from(vec![
         Span::styled(m1, s1),
-        Span::styled("Type:", Style::default().fg(Color::Cyan)),
+        Span::styled("Type:", Style::default().fg(Theme::SECONDARY)),
         Span::raw(format!(" ◀ {} ▶", edge_type_display)),
     ]));
     lines.push(Line::from(""));
@@ -203,13 +207,13 @@ pub fn render_add_edge_form(state: &AddEdgeFormState, frame: &mut Frame, area: R
         "  "
     };
     let s2 = if state.focused_field == 2 {
-        Style::default().fg(Color::Yellow)
+        Style::default().fg(Theme::HIGHLIGHT)
     } else {
-        Style::default().fg(Color::DarkGray)
+        Style::default().fg(Theme::DIM)
     };
     lines.push(Line::from(vec![
         Span::styled(m2, s2),
-        Span::styled("Weight:", Style::default().fg(Color::Cyan)),
+        Span::styled("Weight:", Style::default().fg(Theme::SECONDARY)),
         Span::raw(" "),
         Span::raw(state.weight_input.value()),
     ]));
@@ -217,11 +221,17 @@ pub fn render_add_edge_form(state: &AddEdgeFormState, frame: &mut Frame, area: R
 
     lines.push(Line::from(Span::styled(
         "  Tab: next  ↑/↓: suggest  Enter: select  Esc: cancel",
-        Style::default().fg(Color::DarkGray),
+        Style::default().fg(Theme::DIM),
     )));
 
     let paragraph = Paragraph::new(lines)
-        .block(Block::default().borders(Borders::ALL).title(" Add Edge "))
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .title(" Add Edge ")
+                .title_style(Style::default().fg(Theme::ACCENT).bold()),
+        )
         .wrap(Wrap { trim: false });
     frame.render_widget(paragraph, popup);
 }
@@ -236,8 +246,9 @@ pub fn render_edit_form(state: &mut EditFormState, frame: &mut Frame, area: Rect
     // Outer block
     let outer = Block::default()
         .borders(Borders::ALL)
+        .border_type(BorderType::Rounded)
         .title(format!(" Edit: {} ", state.node_id))
-        .title_style(Style::default().bold());
+        .title_style(Style::default().fg(Theme::ACCENT).bold());
     let inner = outer.inner(popup);
     frame.render_widget(outer, popup);
 
@@ -257,8 +268,8 @@ pub fn render_edit_form(state: &mut EditFormState, frame: &mut Frame, area: Rect
 
     // Node ID (read-only)
     let id_line = Line::from(vec![
-        Span::styled(" Node: ", Style::default().fg(Color::DarkGray)),
-        Span::styled(&state.node_id, Style::default().fg(Color::White).bold()),
+        Span::styled(" Node: ", Style::default().fg(Theme::DIM)),
+        Span::styled(&state.node_id, Style::default().fg(Theme::ACCENT).bold()),
     ]);
     frame.render_widget(id_line, chunks[0]);
 
@@ -266,10 +277,11 @@ pub fn render_edit_form(state: &mut EditFormState, frame: &mut Frame, area: Rect
     let content_focused = state.focused_field == 0;
     let content_block = Block::default()
         .borders(Borders::ALL)
+        .border_type(BorderType::Rounded)
         .border_style(if content_focused {
-            Style::default().fg(Color::Yellow)
+            Style::default().fg(Theme::HIGHLIGHT)
         } else {
-            Style::default().fg(Color::DarkGray)
+            Style::default().fg(Theme::DIM)
         })
         .title(if content_focused {
             " Content (editing) "
@@ -291,13 +303,13 @@ pub fn render_edit_form(state: &mut EditFormState, frame: &mut Frame, area: Rect
         "  "
     };
     let s1 = if state.focused_field == 1 {
-        Style::default().fg(Color::Yellow)
+        Style::default().fg(Theme::HIGHLIGHT)
     } else {
-        Style::default().fg(Color::DarkGray)
+        Style::default().fg(Theme::DIM)
     };
     let weight_line = Line::from(vec![
         Span::styled(m1, s1),
-        Span::styled("Weight: ", Style::default().fg(Color::Cyan)),
+        Span::styled("Weight: ", Style::default().fg(Theme::SECONDARY)),
         Span::raw(state.weight_input.value()),
     ]);
     frame.render_widget(weight_line, chunks[2]);
@@ -309,14 +321,14 @@ pub fn render_edit_form(state: &mut EditFormState, frame: &mut Frame, area: Rect
         "  "
     };
     let s2 = if state.focused_field == 2 {
-        Style::default().fg(Color::Yellow)
+        Style::default().fg(Theme::HIGHLIGHT)
     } else {
-        Style::default().fg(Color::DarkGray)
+        Style::default().fg(Theme::DIM)
     };
     let status_display = STATUSES[state.status_index];
     let status_line = Line::from(vec![
         Span::styled(m2, s2),
-        Span::styled("Status: ", Style::default().fg(Color::Cyan)),
+        Span::styled("Status: ", Style::default().fg(Theme::SECONDARY)),
         Span::raw(format!("◀ {} ▶", status_display)),
     ]);
     frame.render_widget(status_line, chunks[4]);
@@ -324,7 +336,7 @@ pub fn render_edit_form(state: &mut EditFormState, frame: &mut Frame, area: Rect
     // Help
     let help = Line::from(Span::styled(
         " Tab: next field  ←/→: status  Ctrl+S: save  Esc: cancel",
-        Style::default().fg(Color::DarkGray),
+        Style::default().fg(Theme::DIM),
     ));
     frame.render_widget(help, chunks[6]);
 }
