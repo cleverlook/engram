@@ -1,5 +1,5 @@
 namespaces:
 - name: arch
-  node_count: 10
+  node_count: 15
 - name: conventions
   node_count: 1

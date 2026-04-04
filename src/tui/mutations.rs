@@ -59,6 +59,34 @@ pub fn deprecate_node(engram_dir: &Path, id: &str) -> Result<()> {
     Ok(())
 }
 
+pub fn update_node_fields(
+    engram_dir: &Path,
+    id: &str,
+    content: &str,
+    weight: u8,
+    status_str: &str,
+) -> Result<Node> {
+    let existing = storage::load_node(engram_dir, id)?;
+    let mut node = existing.clone();
+    node.content = content.to_string();
+    node.weight = weight;
+    node.status = match status_str {
+        "active" => NodeStatus::Active,
+        "dirty" => NodeStatus::Dirty,
+        "stale" => NodeStatus::Stale,
+        "deprecated" => NodeStatus::Deprecated,
+        _ => NodeStatus::Active,
+    };
+    node.touched = Utc::now();
+
+    indexing::remove_backlinks_from_source(engram_dir, id, &existing)?;
+    storage::save_node(engram_dir, &node)?;
+    indexing::update_index_for_node(engram_dir, &node)?;
+    indexing::update_backlinks_for_node(engram_dir, &node)?;
+    db::upsert_node(engram_dir, &node)?;
+    Ok(node)
+}
+
 pub fn add_edge(engram_dir: &Path, from_id: &str, edge: Edge) -> Result<Node> {
     let mut node = storage::load_node(engram_dir, from_id)?;
     node.edges.push(edge);

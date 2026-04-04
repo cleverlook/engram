@@ -1,5 +1,5 @@
 id: arch:data_flow
-content: |
+content: |-
   Every node mutation (create/update/deprecate) triggers three side effects in order:
   1. YAML write (storage::save_node) — source of truth
   2. Index update (indexing::update_index_for_node + update_backlinks_for_node)
@@ -11,7 +11,7 @@ status: active
 source_files:
 - src/commands/node.rs
 created: 2026-03-13T23:54:17Z
-touched: 2026-03-13T23:54:17Z
+touched: 2026-04-04T12:35:33.867615Z
 edges:
 - to: arch:module_structure
   type: related

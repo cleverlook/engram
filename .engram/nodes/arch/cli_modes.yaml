@@ -1,5 +1,5 @@
 id: arch:cli_modes
-content: |
+content: |-
   Node create and update support four input modes, auto-detected:
   1. Flags: engram node create my:node -c "content" -w 65
   2. Interactive: runs when TTY detected, no id given (dialoguer prompts)
@@ -13,7 +13,7 @@ source_files:
 - src/commands/node.rs
 - src/cli.rs
 created: 2026-03-14T00:20:43Z
-touched: 2026-03-14T00:20:43Z
+touched: 2026-04-04T12:34:53.434876Z
 edges:
 - to: arch:data_flow
   type: related

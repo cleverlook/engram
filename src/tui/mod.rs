@@ -14,12 +14,13 @@ use crossterm::terminal::{
 };
 use ratatui::prelude::*;
 
-use app::{App, EDGE_TYPES, Overlay, View};
+use app::{App, EDGE_TYPES, Overlay, STATUSES, View};
 use event::{Event, EventHandler};
 
 enum TuiAction {
     Create,
     Edit,
+    EditForm,
     Deprecate,
     AddEdge,
 }
@@ -99,10 +100,13 @@ fn render(app: &mut App, frame: &mut Frame) {
             }
         }
         Overlay::CreateForm => {
-            views::overlay::render_create_form(&app.create_form, frame, chunks[0]);
+            views::overlay::render_create_form(&mut app.create_form, frame, chunks[0]);
         }
         Overlay::AddEdgeForm => {
             views::overlay::render_add_edge_form(&app.add_edge_form, frame, chunks[0]);
+        }
+        Overlay::EditForm => {
+            views::overlay::render_edit_form(&mut app.edit_form, frame, chunks[0]);
         }
         Overlay::None => {}
     }
@@ -131,6 +135,8 @@ fn render(app: &mut App, frame: &mut Frame) {
                 Span::raw(" follow  "),
                 Span::styled("e", Style::default().fg(Color::Yellow).bold()),
                 Span::raw(" edit  "),
+                Span::styled("E", Style::default().fg(Color::Yellow).bold()),
+                Span::raw(" raw-edit  "),
                 Span::styled("d", Style::default().fg(Color::Yellow).bold()),
                 Span::raw(" deprecate  "),
                 Span::styled("a", Style::default().fg(Color::Yellow).bold()),
@@ -176,11 +182,17 @@ fn handle_key(app: &mut App, key: KeyEvent) -> Option<TuiAction> {
             return None;
         }
         Overlay::CreateForm => {
+            if key
+                .modifiers
+                .contains(crossterm::event::KeyModifiers::CONTROL)
+                && key.code == KeyCode::Char('s')
+            {
+                return Some(TuiAction::Create);
+            }
             match key.code {
                 KeyCode::Esc => app.close_overlay(),
                 KeyCode::Tab => app.create_form.next_field(),
                 KeyCode::BackTab => app.create_form.prev_field(),
-                KeyCode::Enter => return Some(TuiAction::Create),
                 _ => {
                     app.create_form.handle_input(key);
                 }
@@ -198,9 +210,57 @@ fn handle_key(app: &mut App, key: KeyEvent) -> Option<TuiAction> {
                 KeyCode::Right if app.add_edge_form.focused_field == 1 => {
                     app.add_edge_form.next_type();
                 }
+                KeyCode::Down
+                    if app.add_edge_form.focused_field == 0
+                        && !app.add_edge_form.suggestions.is_empty() =>
+                {
+                    app.add_edge_form.next_suggestion();
+                }
+                KeyCode::Up
+                    if app.add_edge_form.focused_field == 0
+                        && !app.add_edge_form.suggestions.is_empty() =>
+                {
+                    app.add_edge_form.prev_suggestion();
+                }
+                KeyCode::Enter
+                    if app.add_edge_form.focused_field == 0
+                        && !app.add_edge_form.suggestions.is_empty() =>
+                {
+                    app.add_edge_form.accept_suggestion();
+                }
                 KeyCode::Enter => return Some(TuiAction::AddEdge),
                 _ => {
                     app.add_edge_form.handle_input(key);
+                    if app.add_edge_form.focused_field == 0 {
+                        let node_ids: Vec<String> =
+                            app.nodes.iter().map(|n| n.id.clone()).collect();
+                        app.add_edge_form.update_suggestions(&node_ids);
+                    }
+                }
+            }
+            return None;
+        }
+        Overlay::EditForm => {
+            // Ctrl+S saves, Enter is newline in content field
+            if key
+                .modifiers
+                .contains(crossterm::event::KeyModifiers::CONTROL)
+                && key.code == KeyCode::Char('s')
+            {
+                return Some(TuiAction::EditForm);
+            }
+            match key.code {
+                KeyCode::Esc => app.close_overlay(),
+                KeyCode::Tab => app.edit_form.next_field(),
+                KeyCode::BackTab => app.edit_form.prev_field(),
+                KeyCode::Left if app.edit_form.focused_field == 2 => {
+                    app.edit_form.prev_status();
+                }
+                KeyCode::Right if app.edit_form.focused_field == 2 => {
+                    app.edit_form.next_status();
+                }
+                _ => {
+                    app.edit_form.handle_input(key);
                 }
             }
             return None;
@@ -256,7 +316,8 @@ fn handle_key(app: &mut App, key: KeyEvent) -> Option<TuiAction> {
                 KeyCode::Tab => app.detail_state.next_edge(edge_count),
                 KeyCode::BackTab => app.detail_state.prev_edge(edge_count),
                 KeyCode::Enter => app.navigate_to_edge(),
-                KeyCode::Char('e') => return Some(TuiAction::Edit),
+                KeyCode::Char('e') => app.open_edit_form(),
+                KeyCode::Char('E') => return Some(TuiAction::Edit),
                 KeyCode::Char('d') => app.confirm_deprecate(),
                 KeyCode::Char('a') => app.open_add_edge_form(),
                 _ => {}
@@ -288,7 +349,7 @@ fn process_action(
     match action {
         TuiAction::Create => {
             let id = app.create_form.id_input.value().trim().to_string();
-            let content = app.create_form.content_input.value().trim().to_string();
+            let content = app.create_form.content_text();
             let weight: u8 = app
                 .create_form
                 .weight_input
@@ -337,6 +398,32 @@ fn process_action(
                     }
                     Err(e) => app.set_status(format!("{e}"), true),
                 }
+            }
+        }
+        TuiAction::EditForm => {
+            let node_id = app.edit_form.node_id.clone();
+            let content = app.edit_form.content_text();
+            let weight: u8 = app
+                .edit_form
+                .weight_input
+                .value()
+                .trim()
+                .parse()
+                .unwrap_or(50);
+            let status_str = STATUSES[app.edit_form.status_index];
+            app.close_overlay();
+            match mutations::update_node_fields(
+                &app.engram_dir,
+                &node_id,
+                &content,
+                weight,
+                status_str,
+            ) {
+                Ok(_) => {
+                    reload(app)?;
+                    app.set_status(format!("Updated '{node_id}'"), false);
+                }
+                Err(e) => app.set_status(format!("Error: {e}"), true),
             }
         }
         TuiAction::Deprecate => {

@@ -5,12 +5,12 @@ backlinks:
   - from: arch:namespace_mapping
     type: implements
     weight: 60
-  - from: arch:data_flow
-    type: related
-    weight: 70
   - from: arch:agent_interfaces
     type: related
     weight: 40
+  - from: arch:data_flow
+    type: related
+    weight: 70
 - node: arch:traversal
   incoming:
   - from: arch:node_lifecycle

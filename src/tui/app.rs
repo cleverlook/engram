@@ -1,3 +1,4 @@
+use ratatui_textarea::TextArea;
 use tui_input::Input;
 use tui_tree_widget::TreeState;
 
@@ -24,15 +25,17 @@ pub enum Overlay {
     ConfirmDeprecate,
     CreateForm,
     AddEdgeForm,
+    EditForm,
 }
 
 pub const EDGE_TYPES: &[&str] = &["uses", "depends_on", "implements", "rationale", "related"];
+pub const STATUSES: &[&str] = &["active", "dirty", "stale", "deprecated"];
 
 pub struct CreateFormState {
     pub id_input: Input,
-    pub content_input: Input,
+    pub content_textarea: TextArea<'static>,
     pub weight_input: Input,
-    pub focused_field: usize,
+    pub focused_field: usize, // 0=id, 1=content, 2=weight
 }
 
 impl CreateFormState {
@@ -41,12 +44,18 @@ impl CreateFormState {
         for c in "50".chars() {
             weight.handle(tui_input::InputRequest::InsertChar(c));
         }
+        let mut textarea = TextArea::default();
+        textarea.set_cursor_line_style(ratatui::prelude::Style::default());
         Self {
             id_input: Input::default(),
-            content_input: Input::default(),
+            content_textarea: textarea,
             weight_input: weight,
             focused_field: 0,
         }
+    }
+
+    pub fn content_text(&self) -> String {
+        self.content_textarea.lines().join("\n")
     }
 
     pub fn next_field(&mut self) {
@@ -62,13 +71,30 @@ impl CreateFormState {
     }
 
     pub fn handle_input(&mut self, key: crossterm::event::KeyEvent) {
-        use tui_input::backend::crossterm::EventHandler;
-        let input = match self.focused_field {
-            0 => &mut self.id_input,
-            1 => &mut self.content_input,
-            _ => &mut self.weight_input,
-        };
-        input.handle_event(&crossterm::event::Event::Key(key));
+        match self.focused_field {
+            0 => {
+                use tui_input::backend::crossterm::EventHandler;
+                self.id_input
+                    .handle_event(&crossterm::event::Event::Key(key));
+            }
+            1 => {
+                self.content_textarea.input(ratatui_textarea::Input {
+                    key: convert_key(key.code),
+                    ctrl: key
+                        .modifiers
+                        .contains(crossterm::event::KeyModifiers::CONTROL),
+                    alt: key.modifiers.contains(crossterm::event::KeyModifiers::ALT),
+                    shift: key
+                        .modifiers
+                        .contains(crossterm::event::KeyModifiers::SHIFT),
+                });
+            }
+            _ => {
+                use tui_input::backend::crossterm::EventHandler;
+                self.weight_input
+                    .handle_event(&crossterm::event::Event::Key(key));
+            }
+        }
     }
 }
 
@@ -77,6 +103,8 @@ pub struct AddEdgeFormState {
     pub edge_type_index: usize,
     pub weight_input: Input,
     pub focused_field: usize,
+    pub suggestions: Vec<String>,
+    pub selected_suggestion: usize,
 }
 
 impl AddEdgeFormState {
@@ -90,6 +118,50 @@ impl AddEdgeFormState {
             edge_type_index: 0,
             weight_input: weight,
             focused_field: 0,
+            suggestions: Vec::new(),
+            selected_suggestion: 0,
+        }
+    }
+
+    pub fn update_suggestions(&mut self, node_ids: &[String]) {
+        let query = self.target_input.value().to_lowercase();
+        if query.is_empty() {
+            self.suggestions.clear();
+        } else {
+            self.suggestions = node_ids
+                .iter()
+                .filter(|id| id.to_lowercase().contains(&query))
+                .take(8)
+                .cloned()
+                .collect();
+        }
+        self.selected_suggestion = 0;
+    }
+
+    pub fn next_suggestion(&mut self) {
+        if !self.suggestions.is_empty() {
+            self.selected_suggestion = (self.selected_suggestion + 1) % self.suggestions.len();
+        }
+    }
+
+    pub fn prev_suggestion(&mut self) {
+        if !self.suggestions.is_empty() {
+            self.selected_suggestion = if self.selected_suggestion == 0 {
+                self.suggestions.len() - 1
+            } else {
+                self.selected_suggestion - 1
+            };
+        }
+    }
+
+    pub fn accept_suggestion(&mut self) {
+        if let Some(id) = self.suggestions.get(self.selected_suggestion).cloned() {
+            self.target_input = Input::default();
+            for c in id.chars() {
+                self.target_input
+                    .handle(tui_input::InputRequest::InsertChar(c));
+            }
+            self.suggestions.clear();
         }
     }
 
@@ -125,6 +197,125 @@ impl AddEdgeFormState {
             _ => return, // type field uses left/right, not text input
         };
         input.handle_event(&crossterm::event::Event::Key(key));
+    }
+}
+
+pub struct EditFormState {
+    pub node_id: String,
+    pub content_textarea: TextArea<'static>,
+    pub weight_input: Input,
+    pub status_index: usize,
+    pub focused_field: usize, // 0=content, 1=weight, 2=status
+}
+
+impl EditFormState {
+    pub fn empty() -> Self {
+        Self {
+            node_id: String::new(),
+            content_textarea: TextArea::default(),
+            weight_input: Input::default(),
+            status_index: 0,
+            focused_field: 0,
+        }
+    }
+
+    pub fn from_node(node: &crate::models::node::Node) -> Self {
+        use crate::models::node::NodeStatus;
+        let lines: Vec<String> = node.content.lines().map(String::from).collect();
+        let mut textarea = TextArea::new(lines);
+        textarea.set_cursor_line_style(ratatui::prelude::Style::default());
+        let mut weight = Input::default();
+        for c in node.weight.to_string().chars() {
+            weight.handle(tui_input::InputRequest::InsertChar(c));
+        }
+        let status_index = match node.status {
+            NodeStatus::Active => 0,
+            NodeStatus::Dirty => 1,
+            NodeStatus::Stale => 2,
+            NodeStatus::Deprecated => 3,
+        };
+        Self {
+            node_id: node.id.clone(),
+            content_textarea: textarea,
+            weight_input: weight,
+            status_index,
+            focused_field: 0,
+        }
+    }
+
+    pub fn content_text(&self) -> String {
+        self.content_textarea.lines().join("\n")
+    }
+
+    pub fn next_field(&mut self) {
+        self.focused_field = (self.focused_field + 1) % 3;
+    }
+
+    pub fn prev_field(&mut self) {
+        self.focused_field = if self.focused_field == 0 {
+            2
+        } else {
+            self.focused_field - 1
+        };
+    }
+
+    pub fn next_status(&mut self) {
+        self.status_index = (self.status_index + 1) % STATUSES.len();
+    }
+
+    pub fn prev_status(&mut self) {
+        self.status_index = if self.status_index == 0 {
+            STATUSES.len() - 1
+        } else {
+            self.status_index - 1
+        };
+    }
+
+    pub fn handle_input(&mut self, key: crossterm::event::KeyEvent) {
+        match self.focused_field {
+            0 => {
+                // Convert our crossterm 0.28 KeyEvent to ratatui_textarea::Input manually
+                self.content_textarea.input(ratatui_textarea::Input {
+                    key: convert_key(key.code),
+                    ctrl: key
+                        .modifiers
+                        .contains(crossterm::event::KeyModifiers::CONTROL),
+                    alt: key.modifiers.contains(crossterm::event::KeyModifiers::ALT),
+                    shift: key
+                        .modifiers
+                        .contains(crossterm::event::KeyModifiers::SHIFT),
+                });
+            }
+            1 => {
+                use tui_input::backend::crossterm::EventHandler;
+                self.weight_input
+                    .handle_event(&crossterm::event::Event::Key(key));
+            }
+            _ => {} // status uses left/right
+        }
+    }
+}
+
+fn convert_key(code: crossterm::event::KeyCode) -> ratatui_textarea::Key {
+    use crossterm::event::KeyCode;
+    use ratatui_textarea::Key;
+    match code {
+        KeyCode::Char(c) => Key::Char(c),
+        KeyCode::F(n) => Key::F(n),
+        KeyCode::Backspace => Key::Backspace,
+        KeyCode::Enter => Key::Enter,
+        KeyCode::Left => Key::Left,
+        KeyCode::Right => Key::Right,
+        KeyCode::Up => Key::Up,
+        KeyCode::Down => Key::Down,
+        KeyCode::Tab => Key::Tab,
+        KeyCode::Delete => Key::Delete,
+        KeyCode::Home => Key::Home,
+        KeyCode::End => Key::End,
+        KeyCode::PageUp => Key::PageUp,
+        KeyCode::PageDown => Key::PageDown,
+        KeyCode::Esc => Key::Esc,
+        _ => Key::Null,
     }
 }
 
@@ -212,6 +403,7 @@ pub struct App {
     pub overlay: Overlay,
     pub create_form: CreateFormState,
     pub add_edge_form: AddEdgeFormState,
+    pub edit_form: EditFormState,
     pub status_message: Option<(String, bool)>, // (message, is_error)
     pub tree_state: TreeState<String>,
 }
@@ -231,6 +423,7 @@ impl App {
             overlay: Overlay::None,
             create_form: CreateFormState::new(),
             add_edge_form: AddEdgeFormState::new(),
+            edit_form: EditFormState::empty(),
             status_message: None,
             tree_state: TreeState::default(),
         }
@@ -373,6 +566,13 @@ impl App {
     pub fn open_create_form(&mut self) {
         self.create_form = CreateFormState::new();
         self.overlay = Overlay::CreateForm;
+    }
+
+    pub fn open_edit_form(&mut self) {
+        if let Some(node) = self.selected_node().cloned() {
+            self.edit_form = EditFormState::from_node(&node);
+            self.overlay = Overlay::EditForm;
+        }
     }
 
     pub fn open_add_edge_form(&mut self) {
@@ -579,5 +779,15 @@ mod tests {
     fn create_form_default_weight() {
         let form = CreateFormState::new();
         assert_eq!(form.weight_input.value(), "50");
+    }
+
+    #[test]
+    fn edit_form_from_node() {
+        let node = make_node("test:node");
+        let form = EditFormState::from_node(&node);
+        assert_eq!(form.node_id, "test:node");
+        assert_eq!(form.content_text(), "Content for test:node");
+        assert_eq!(form.weight_input.value(), "50");
+        assert_eq!(form.status_index, 0); // Active
     }
 }

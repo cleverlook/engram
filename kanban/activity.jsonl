@@ -104,3 +104,13 @@
 {"timestamp":"2026-04-03T21:10:02.009376+02:00","action":"edit","task_id":33,"detail":"TUI: tree view as default - namespace hierarchy instead of flat list"}
 {"timestamp":"2026-04-03T21:10:02.010685+02:00","action":"release","task_id":33,"detail":"claude"}
 {"timestamp":"2026-04-03T21:10:02.085576+02:00","action":"move","task_id":33,"detail":"in-progress -\u003e done"}
+{"timestamp":"2026-04-04T14:24:06.561279+02:00","action":"move","task_id":34,"detail":"backlog -\u003e todo"}
+{"timestamp":"2026-04-04T14:24:06.576898+02:00","action":"move","task_id":34,"detail":"todo -\u003e in-progress"}
+{"timestamp":"2026-04-04T14:30:03.028183+02:00","action":"edit","task_id":34,"detail":"TUI: form-based node editing with field navigation"}
+{"timestamp":"2026-04-04T14:30:03.028376+02:00","action":"release","task_id":34,"detail":"claude"}
+{"timestamp":"2026-04-04T14:30:03.042845+02:00","action":"move","task_id":34,"detail":"in-progress -\u003e done"}
+{"timestamp":"2026-04-04T15:20:24.550982+02:00","action":"move","task_id":35,"detail":"backlog -\u003e todo"}
+{"timestamp":"2026-04-04T15:20:24.567073+02:00","action":"move","task_id":35,"detail":"todo -\u003e in-progress"}
+{"timestamp":"2026-04-04T15:28:17.165013+02:00","action":"edit","task_id":35,"detail":"TUI: autocomplete/search for edge target selection"}
+{"timestamp":"2026-04-04T15:28:17.165687+02:00","action":"release","task_id":35,"detail":"claude"}
+{"timestamp":"2026-04-04T15:28:17.180433+02:00","action":"move","task_id":35,"detail":"in-progress -\u003e done"}
