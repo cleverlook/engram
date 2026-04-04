@@ -165,39 +165,49 @@ fn render_preview(app: &App, frame: &mut Frame, area: Rect) {
 
     let content = match selected_node {
         Some(node) => {
+            let (icon, _) = status_icon_color(&node.status);
             let mut lines = vec![
                 Line::from(vec![
+                    Span::raw(" "),
                     Span::styled("ID: ", Style::default().fg(Color::DarkGray)),
                     Span::styled(&node.id, Style::default().bold()),
                 ]),
                 Line::from(vec![
+                    Span::raw(" "),
                     Span::styled("Status: ", Style::default().fg(Color::DarkGray)),
                     Span::styled(
-                        format!("{:?}", node.status),
+                        format!("{icon} {:?}", node.status),
                         Style::default().fg(status_icon_color(&node.status).1),
                     ),
                     Span::styled("  Weight: ", Style::default().fg(Color::DarkGray)),
                     Span::raw(format!("{}", node.weight)),
                 ]),
                 Line::from(vec![
+                    Span::raw(" "),
                     Span::styled("Touched: ", Style::default().fg(Color::DarkGray)),
                     Span::raw(node.touched.format("%Y-%m-%d %H:%M").to_string()),
                 ]),
                 Line::from(""),
-                Line::from(Span::styled("Content:", Style::default().fg(Color::Yellow))),
+                Line::from(Span::styled(
+                    " ─── Content ──────────────────────────────────",
+                    Style::default().fg(Color::Yellow),
+                )),
             ];
             for line in node.content.lines() {
-                lines.push(Line::from(line.to_string()));
+                lines.push(Line::from(format!("  {line}")));
             }
             if !node.edges.is_empty() {
                 lines.push(Line::from(""));
                 lines.push(Line::from(Span::styled(
-                    "Edges:",
+                    format!(
+                        " ─── Edges: {} ────────────────────────────────",
+                        node.edges.len()
+                    ),
                     Style::default().fg(Color::Yellow),
                 )));
                 for edge in &node.edges {
                     lines.push(Line::from(vec![
-                        Span::raw("  → "),
+                        Span::raw("   → "),
                         Span::styled(&edge.to, Style::default().fg(Color::Cyan)),
                         Span::styled(
                             format!("  [{:?} w:{}]", edge.edge_type, edge.weight),
@@ -208,7 +218,7 @@ fn render_preview(app: &App, frame: &mut Frame, area: Rect) {
             }
             lines
         }
-        None => vec![Line::from("No node selected")],
+        None => vec![Line::from(" No node selected")],
     };
 
     let paragraph = Paragraph::new(content)

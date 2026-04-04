@@ -10,14 +10,31 @@ fn centered_rect(width: u16, height: u16, area: Rect) -> Rect {
 }
 
 pub fn render_confirm_deprecate(node_id: &str, frame: &mut Frame, area: Rect) {
-    let popup = centered_rect(50, 5, area);
+    let popup = centered_rect(50, 7, area);
     frame.render_widget(Clear, popup);
-    let text = format!("Deprecate '{}'?\n\n[y] Yes  [n/Esc] Cancel", node_id);
-    let paragraph = Paragraph::new(text)
+    let lines = vec![
+        Line::from(""),
+        Line::from(vec![
+            Span::styled("  ⚠ ", Style::default().fg(Color::Yellow)),
+            Span::raw("Deprecate "),
+            Span::styled(node_id, Style::default().fg(Color::Cyan).bold()),
+            Span::raw("?"),
+        ]),
+        Line::from(""),
+        Line::from(vec![
+            Span::raw("  "),
+            Span::styled("[y]", Style::default().fg(Color::Green).bold()),
+            Span::raw(" Yes   "),
+            Span::styled("[n/Esc]", Style::default().fg(Color::Red).bold()),
+            Span::raw(" Cancel"),
+        ]),
+    ];
+    let paragraph = Paragraph::new(lines)
         .block(
             Block::default()
                 .borders(Borders::ALL)
-                .title(" Confirm Deprecate "),
+                .title(" Confirm Deprecate ")
+                .title_style(Style::default().fg(Color::Yellow).bold()),
         )
         .wrap(Wrap { trim: false });
     frame.render_widget(paragraph, popup);

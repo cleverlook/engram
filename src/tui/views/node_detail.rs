@@ -10,10 +10,13 @@ pub fn render(node: &Node, state: &DetailState, frame: &mut Frame, area: Rect) {
     let mut lines: Vec<Line> = vec![];
 
     // Header section
-    lines.push(Line::from(Span::styled(
-        &node.id,
-        Style::default().fg(Color::Cyan).bold().underlined(),
-    )));
+    lines.push(Line::from(vec![
+        Span::raw(" "),
+        Span::styled(
+            &node.id,
+            Style::default().fg(Color::Cyan).bold().underlined(),
+        ),
+    ]));
     lines.push(Line::from(""));
 
     // History breadcrumb
@@ -21,7 +24,7 @@ pub fn render(node: &Node, state: &DetailState, frame: &mut Frame, area: Rect) {
         let steps = state.history.len();
         lines.push(Line::from(Span::styled(
             format!(
-                "  ← {} step{} back (Backspace)",
+                "   ← {} step{} back (Backspace)",
                 steps,
                 if steps == 1 { "" } else { "s" }
             ),
@@ -30,28 +33,34 @@ pub fn render(node: &Node, state: &DetailState, frame: &mut Frame, area: Rect) {
     }
 
     // Metadata
+    let (icon, _) = status_icon(&node.status);
     lines.push(Line::from(vec![
+        Span::raw(" "),
         Span::styled("Status:  ", Style::default().fg(Color::DarkGray)),
         Span::styled(
-            format!("{:?}", node.status),
+            format!("{icon} {:?}", node.status),
             Style::default().fg(status_color(&node.status)),
         ),
     ]));
     lines.push(Line::from(vec![
+        Span::raw(" "),
         Span::styled("Weight:  ", Style::default().fg(Color::DarkGray)),
         Span::raw(format!("{}", node.weight)),
     ]));
     lines.push(Line::from(vec![
+        Span::raw(" "),
         Span::styled("Created: ", Style::default().fg(Color::DarkGray)),
         Span::raw(node.created.format("%Y-%m-%d %H:%M UTC").to_string()),
     ]));
     lines.push(Line::from(vec![
+        Span::raw(" "),
         Span::styled("Touched: ", Style::default().fg(Color::DarkGray)),
         Span::raw(node.touched.format("%Y-%m-%d %H:%M UTC").to_string()),
     ]));
 
     if !node.source_files.is_empty() {
         lines.push(Line::from(vec![
+            Span::raw(" "),
             Span::styled("Sources: ", Style::default().fg(Color::DarkGray)),
             Span::raw(node.source_files.join(", ")),
         ]));
@@ -60,23 +69,23 @@ pub fn render(node: &Node, state: &DetailState, frame: &mut Frame, area: Rect) {
     // Content
     lines.push(Line::from(""));
     lines.push(Line::from(Span::styled(
-        "── Content ──────────────────────────",
+        " ─── Content ──────────────────────────────────",
         Style::default().fg(Color::Yellow),
     )));
     for line in node.content.lines() {
-        lines.push(Line::from(line.to_string()));
+        lines.push(Line::from(format!("  {line}")));
     }
 
     // Edges
     if !node.edges.is_empty() {
         lines.push(Line::from(""));
         lines.push(Line::from(Span::styled(
-            "── Edges (Tab: select, Enter: follow) ─",
+            " ─── Edges ────────────────────────────────────",
             Style::default().fg(Color::Yellow),
         )));
         for (i, edge) in node.edges.iter().enumerate() {
             let selected = i == state.selected_edge;
-            let marker = if selected { "▶ → " } else { "  → " };
+            let marker = if selected { " ▶ → " } else { "   → " };
             let marker_style = if selected {
                 Style::default().fg(Color::Yellow)
             } else {
@@ -102,11 +111,11 @@ pub fn render(node: &Node, state: &DetailState, frame: &mut Frame, area: Rect) {
     if !node.data_lake.is_empty() {
         lines.push(Line::from(""));
         lines.push(Line::from(Span::styled(
-            "── Data Lake ────────────────────────",
+            " ─── Data Lake ────────────────────────────────",
             Style::default().fg(Color::Yellow),
         )));
         for file in &node.data_lake {
-            lines.push(Line::from(format!("  📎 {file}")));
+            lines.push(Line::from(format!("   📎 {file}")));
         }
     }
 
@@ -141,5 +150,14 @@ fn status_color(status: &NodeStatus) -> Color {
         NodeStatus::Dirty => Color::Yellow,
         NodeStatus::Stale => Color::Yellow,
         NodeStatus::Deprecated => Color::Red,
+    }
+}
+
+fn status_icon(status: &NodeStatus) -> (&'static str, Color) {
+    match status {
+        NodeStatus::Active => ("●", Color::Green),
+        NodeStatus::Dirty => ("◐", Color::Yellow),
+        NodeStatus::Stale => ("○", Color::Yellow),
+        NodeStatus::Deprecated => ("✕", Color::Red),
     }
 }
